@@ -14,8 +14,10 @@ def cc_energy(n, B, de):
                     e += de
     return e
 
+
 def acceptance(beta, delta_energy):
     return min(1, np.exp(-beta * delta_energy))
+
 
 def cc_r_b(n, B):
     red = 0
@@ -28,6 +30,7 @@ def cc_r_b(n, B):
                 elif B[i, j] + B[j, k] + B[k, i] == -3:
                     blue += 1
     return red, blue
+
 
 def metropolis_algorithm(n, mc_steps, beta, de):
     # Set random seed for reproducibility (Optional)
@@ -85,7 +88,7 @@ def metropolis_algorithm(n, mc_steps, beta, de):
     print("\n\n case 03: failure \n\n")  # third scenario
     print("- For %d vertices we obtain:\n" % n)
     print("- final energy = %d\n\n" % energy[i + 1])
-    
+
     # metropolis_algorithm 関数の最後に以下を追加
     print("\n--- Result ---")
     print("- For %d vertices we obtain:" % n)
@@ -93,8 +96,8 @@ def metropolis_algorithm(n, mc_steps, beta, de):
     print("Red cliques: %d" % red)
     print("Blue cliques: %d" % blue)
 
-
     return energy, B
+
 
 # Input parameters
 n = 5  # # vertices
