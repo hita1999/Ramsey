@@ -120,8 +120,8 @@ edge_norm = plt.Normalize(min(edge_weights), max(edge_weights))
 
 # Draw the graph with edge colors and colorbar
 plt.figure(2)
-nx.draw(G, pos, node_color='k', edge_color=edge_weights, edge_cmap=plt.cm.cool,
-        with_labels=True, width=2, edge_vmin=min(edge_weights), edge_vmax=max(edge_weights))
+nx.draw_networkx(G, pos, node_color='k', edge_color=edge_weights, edge_cmap=plt.cm.cool,
+                 with_labels=True, width=2, edge_vmin=min(edge_weights), edge_vmax=max(edge_weights))
 c = plt.colorbar(cm.ScalarMappable(norm=edge_norm, cmap=plt.cm.cool))
 c.set_label("Edge Weight")
 plt.show()
