@@ -1,3 +1,5 @@
+#Quote "https://medium.com/@pravin.bezwada/fun-with-ramsey-numbers-dcc477f138a8"
+
 import warnings
 
 import matplotlib.pyplot as plt
