@@ -10,7 +10,7 @@ def read_adjacency_matrix(file_path):
             adjacency_matrix.append(row)
     return adjacency_matrix
 
-file_path = 'adjcencyMatrix/R(3_12_52).txt'
+file_path = 'adjcencyMatrix/R(4_6_35).txt'
 adjacency_matrix = read_adjacency_matrix(file_path)
 
 # 行列の対角線以外の0を2に変更する

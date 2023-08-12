@@ -17,18 +17,26 @@ def adj_list_to_adj_matrix(adj_list, num_nodes):
             adj_matrix[node][neighbor] = 1
     return adj_matrix
 
-file_path = 'adjcencyMatrix/R(3_11_44)_list.txt'
+
+def save_adj_matrix_to_txt(adj_matrix, file_path):
+    with open(file_path, 'w') as file:
+        for row in adj_matrix:
+            file.write(''.join(map(str, row)) + '\n')
+
+file_path = 'adjcencyMatrix/R(4_6_35)_list.txt'
 adj_list = read_adj_list(file_path)
 num_nodes = len(adj_list)
 adj_matrix = adj_list_to_adj_matrix(adj_list, num_nodes)
 print(adj_matrix)
+
+output_file_path = 'adjcencyMatrix/R(4_6_35).txt'
+save_adj_matrix_to_txt(adj_matrix, output_file_path)
 
 # 行列の対角線以外の0を2に変更する
 for i in range(len(adj_matrix)):
     for j in range(len(adj_matrix[i])):
         if i != j and adj_matrix[i][j] == 0:
             adj_matrix[i][j] = 2
-
 
 # グラフを作成
 G = nx.from_numpy_array(np.array(adj_matrix))
