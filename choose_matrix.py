@@ -40,43 +40,35 @@ np.fill_diagonal(inverted_matrix, 0)
 print(inverted_matrix)
 
 # インデックスの組み合わせを生成
-target_rows = 8  # 適切なサイズに変更
-# indices_combinations = generate_combinations(len(original_matrix), target_rows)
-# total_combinations = sum(1 for _ in indices_combinations)
-# print("\n総組み合わせ数:", total_combinations)  # 生成される組み合わせの数を確認
+target_rows = target_matrix.shape[0]
 
+
+count = 0
+inverted_count = 0
+bound_distance = 5
 # 生成された組み合わせを順にチェック
-indices_combinations = generate_combinations(len(original_matrix), target_rows)  # ジェネレータを再生成
+indices_combinations = generate_combinations(len(original_matrix), target_rows)  # ジェネレータを生成
 for idx, indices in enumerate(indices_combinations):
-    if idx % 100 == 0:
+    if idx % 1000000 == 0:
         print(f"組み合わせ {idx}番目")
     
     submatrix = original_matrix[np.ix_(indices, indices)]
     distance = euclidean_distance(submatrix, target_matrix)
     inverted_distance = euclidean_distance(submatrix, inverted_matrix)
     
-    if distance < 4:
-        print("ユークリッド距離:", distance)
-        print("選ばれたインデックス:", indices)
-        print("選ばれた行と列だけを取り出した部分行列:")
-        print(submatrix)
+    if distance <= bound_distance:
+        count += 1
+        # print("ユークリッド距離:", distance)
+        # print("選ばれたインデックス:", indices)
+        # print("選ばれた行と列だけを取り出した部分行列:")
+        # print(submatrix)
         
-    if inverted_distance < 4:
-        print("ユークリッド距離:", inverted_distance)
-        print("選ばれたインデックス:", indices)
-        print("選ばれた反転行列:")
-        print(submatrix)
-    # if check_combination(original_matrix, indices, target_matrix):
-    #     print("一致する組み合わせが見つかりました！")
-    #     print("選ばれたインデックス:", indices)
-    #     print("選ばれた行と列だけを取り出した部分行列:")
-    #     print(original_matrix[np.ix_(indices, indices)])
-    #     break
-    # elif check_combination(original_matrix, indices, inverted_matrix):
-    #     print("一致する組み合わせが見つかりました！")
-    #     print("選ばれたインデックス:", indices)
-    #     print("選ばれた反転行列:")
-    #     print(original_matrix[np.ix_(indices, indices)])
-    #     break
-else:
-    print("一致する組み合わせは見つかりませんでした。")
+    if inverted_distance <= bound_distance:
+        inverted_count += 1
+        # print("ユークリッド距離:", inverted_distance)
+        # print("選ばれたインデックス:", indices)
+        # print("選ばれた反転行列:")
+        # print(submatrix)
+    
+print(f"distance {bound_distance}以下のカウント数", count)
+print(f"inverted distance {bound_distance}以下のカウント数", inverted_count)

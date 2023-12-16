@@ -44,11 +44,11 @@ def read_adjacency_matrix(file_path):
             adjacency_matrix.append(row)
     return adjacency_matrix
 
-file_path = 'adjcencyMatrix/pappus18.txt'
+file_path = 'adjcencyMatrix/R(5_6_58).txt'
 adjacency_matrix = read_adjacency_matrix(file_path)
 
-selected_rows = [i for i in range(18)]
-#selected_cols = [0, 1, 9]
+selected_rows = [i for i in range(58)]
+#selected_rows = [10, 11, 14, 15]
 
 # 関数を呼び出して描画
 draw_subgraph(file_path, selected_rows, selected_rows)
