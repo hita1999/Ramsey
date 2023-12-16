@@ -26,10 +26,10 @@ def generate_combinations(total, size):
     for indices in itertools.combinations(range(total), size):
         yield indices
 
-file_path = 'adjcencyMatrix/pappus18.txt'
+file_path = 'adjcencyMatrix/R(5_5_42).txt'
 original_matrix = read_adjacency_matrix(file_path)
 
-target_path = 'adjcencyMatrix/B6.txt'
+target_path = 'adjcencyMatrix/K5.txt'
 target_matrix = read_adjacency_matrix(target_path)
     
 
@@ -45,11 +45,11 @@ target_rows = target_matrix.shape[0]
 
 count = 0
 inverted_count = 0
-bound_distance = 5
+bound_distance = 0
 # 生成された組み合わせを順にチェック
 indices_combinations = generate_combinations(len(original_matrix), target_rows)  # ジェネレータを生成
 for idx, indices in enumerate(indices_combinations):
-    if idx % 1000000 == 0:
+    if idx % 1000 == 0:
         print(f"組み合わせ {idx}番目")
     
     submatrix = original_matrix[np.ix_(indices, indices)]

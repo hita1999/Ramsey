@@ -51,12 +51,13 @@ def process_combinations(args):
     print(f"inverted distance {bound_distance}以下のカウント数", inverted_count)
 
 if __name__ == "__main__":
-    file_path = 'adjcencyMatrix/pappus18.txt'
-    target_path = 'adjcencyMatrix/B6.txt'
+    file_path = 'adjcencyMatrix/Paley(17).txt'
+    target_path = 'adjcencyMatrix/B3.txt'
     target_matrix = read_adjacency_matrix(target_path)
     inverted_matrix = 1 - target_matrix
     np.fill_diagonal(inverted_matrix, 0)
     
-    bound_distance = 5  # 適切な値に変更
+    bound_distance = 0  # 適切な値に変更
     
     process_combinations((file_path, target_matrix, inverted_matrix, bound_distance))
+    

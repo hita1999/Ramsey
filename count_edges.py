@@ -9,7 +9,7 @@ def read_matrix_from_file(file_path):
     return np.array(matrix)
 
 
-file_path = 'adjcencyMatrix/pappus18.txt'
+file_path = 'adjcencyMatrix/K9_9-I.txt'
 matrix = read_matrix_from_file(file_path)
 
 # 上三角部分を抽出
