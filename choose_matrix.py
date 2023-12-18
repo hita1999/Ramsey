@@ -26,10 +26,10 @@ def generate_combinations(total, size):
     for indices in itertools.combinations(range(total), size):
         yield indices
 
-file_path = 'random18VertexGraph/random_adjacency_matrix_with_50_ones.txt'
+file_path = 'adjcencyMatrix/Paley(17).txt'
 original_matrix = read_adjacency_matrix(file_path)
 
-target_path = 'adjcencyMatrix/B6.txt'
+target_path = 'adjcencyMatrix/B3.txt'
 target_matrix = read_adjacency_matrix(target_path)
     
 
@@ -58,10 +58,10 @@ for idx, indices in enumerate(indices_combinations):
     
     if distance <= bound_distance:
         count += 1
-        # print("ユークリッド距離:", distance)
-        # print("選ばれたインデックス:", indices)
-        # print("選ばれた行と列だけを取り出した部分行列:")
-        # print(submatrix)
+        print("ユークリッド距離:", distance)
+        print("選ばれたインデックス:", list(indices))
+        print("選ばれた行と列だけを取り出した部分行列:")
+        print(submatrix)
         
     if inverted_distance <= bound_distance:
         inverted_count += 1
