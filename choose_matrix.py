@@ -26,10 +26,10 @@ def generate_combinations(total, size):
     for indices in itertools.combinations(range(total), size):
         yield indices
 
-file_path = 'adjcencyMatrix/R(5_5_42).txt'
+file_path = 'random18VertexGraph/random_adjacency_matrix_with_50_ones.txt'
 original_matrix = read_adjacency_matrix(file_path)
 
-target_path = 'adjcencyMatrix/K5.txt'
+target_path = 'adjcencyMatrix/B6.txt'
 target_matrix = read_adjacency_matrix(target_path)
     
 
