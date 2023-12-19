@@ -26,7 +26,7 @@ def generate_combinations(total, size):
     for indices in itertools.combinations(range(total), size):
         yield indices
 
-file_path = 'adjcencyMatrix/Paley(17).txt'
+file_path = 'R(B3_B6_18).txt'
 original_matrix = read_adjacency_matrix(file_path)
 
 target_path = 'adjcencyMatrix/B3.txt'
@@ -65,10 +65,10 @@ for idx, indices in enumerate(indices_combinations):
         
     if inverted_distance <= bound_distance:
         inverted_count += 1
-        # print("ユークリッド距離:", inverted_distance)
-        # print("選ばれたインデックス:", indices)
-        # print("選ばれた反転行列:")
-        # print(submatrix)
+        print("ユークリッド距離:", inverted_distance)
+        print("選ばれたインデックス:", list(indices))
+        print("選ばれた反転行列:")
+        print(submatrix)
     
 print(f"distance {bound_distance}以下のカウント数", count)
 print(f"inverted distance {bound_distance}以下のカウント数", inverted_count)

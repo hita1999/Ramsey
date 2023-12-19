@@ -10,7 +10,7 @@ def modify_matrix(matrix):
     for i in range(rows):
         for j in range(cols):
             if i != j and modified_matrix[i, j] == 0:
-                modified_matrix[i, j] = 2
+                modified_matrix[i, j] = 0
 
     return modified_matrix
 
@@ -44,11 +44,11 @@ def read_adjacency_matrix(file_path):
             adjacency_matrix.append(row)
     return adjacency_matrix
 
-file_path = 'adjcencyMatrix/Paley(17).txt'
+file_path = 'R(B3_B6_18).txt'
 adjacency_matrix = read_adjacency_matrix(file_path)
 
-#selected_rows = [i for i in range(17)]
-selected_rows = [2, 8, 12, 14, 15]
+selected_rows = [i for i in range(18)]
+#selected_rows = [3, 5, 7, 12, 17]
 
 # 関数を呼び出して描画
 draw_subgraph(file_path, selected_rows, selected_rows)

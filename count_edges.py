@@ -9,7 +9,7 @@ def read_matrix_from_file(file_path):
     return np.array(matrix)
 
 if __name__ == '__main__':
-    file_path = 'random18VertexGraph/random_adjacency_matrix_5.txt'
+    file_path = 'R(B3_B6_18).txt'
     matrix = read_matrix_from_file(file_path)
 
     # 上三角部分を抽出
