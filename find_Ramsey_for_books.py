@@ -1,4 +1,5 @@
 import itertools
+import random
 import numpy as np
 
 
@@ -38,8 +39,8 @@ def check_combinations(original_matrix, target_matrix, inverted_matrix, target_r
     indices_combinations = generate_combinations(len(original_matrix), target_rows)
     
     for idx, indices in enumerate(indices_combinations):
-        if idx % 1000 == 0:
-            print(f"組み合わせ {idx}番目")
+        # if idx % 1000 == 0:
+        #     print(f"組み合わせ {idx}番目")
 
         submatrix = original_matrix[np.ix_(indices, indices)]
         distance = euclidean_distance(submatrix, target_matrix)
@@ -74,25 +75,42 @@ def swap_rows_and_columns(original_matrix, random_sequence):
 
 
 def main():
-    file_path = 'R(B3_B6_18).txt'
+    file_path = 'adjcencyMatrix/K9_9-I.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
-    target_path = 'adjcencyMatrix/B6.txt'
-    target_matrix = read_adjacency_matrix(target_path)
-
-    inverted_matrix = 1 - target_matrix
-    np.fill_diagonal(inverted_matrix, 0)
-
-    target_rows = target_matrix.shape[0]
+    first_target_path = 'adjcencyMatrix/B6.txt'
+    first_target_matrix = read_adjacency_matrix(first_target_path)
+    first_inverted_matrix = 1 - first_target_matrix
+    np.fill_diagonal(first_inverted_matrix, 0)
+    first_target_rows = first_target_matrix.shape[0]
+    
+    second_target_path = 'adjcencyMatrix/B3.txt'
+    second_target_matrix = read_adjacency_matrix(second_target_path)
+    second_inverted_matrix = 1 - second_target_matrix
+    np.fill_diagonal(second_inverted_matrix, 0)
+    second_target_rows = second_target_matrix.shape[0]
+    
     bound_distance = 0
     count_sum = 1
-    idx = 17
+    
     while count_sum > 0:
+        idx = random.randint(0, len(original_matrix)-1)
         new_sequence = generate_random_binary_sequence(len(original_matrix[idx][idx+1:]))
         new_matrix = swap_rows_and_columns(original_matrix, new_sequence)
-        print(new_matrix)
-        count, inverted_count = check_combinations(new_matrix, target_matrix, inverted_matrix, target_rows, bound_distance)
-        count_sum = min(count, inverted_count)
+        #print(new_matrix)
+        fisrt_count, first_inverted_count = check_combinations(new_matrix, first_target_matrix, first_inverted_matrix, first_target_rows, bound_distance)
+        first_count_sum = min(fisrt_count, first_inverted_count)
+        
+        if first_count_sum == 0:
+            second_count, second_inverted_count = check_combinations(new_matrix, second_target_matrix, second_inverted_matrix, second_target_rows, bound_distance)
+            
+            if second_count == 0 and second_inverted_count == 0:
+                print("条件を満たすグラフが見つかりました")
+                break
+            else:
+                print("条件を満たすグラフは見つかりませんでした")
+                original_matrix = new_matrix
+                continue
         
     save_matrix_to_txt(new_matrix, 'R(B3_B6_18).txt')
 

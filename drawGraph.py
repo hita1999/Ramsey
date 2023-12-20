@@ -10,7 +10,7 @@ def modify_matrix(matrix):
     for i in range(rows):
         for j in range(cols):
             if i != j and modified_matrix[i, j] == 0:
-                modified_matrix[i, j] = 0
+                modified_matrix[i, j] = 2
 
     return modified_matrix
 
