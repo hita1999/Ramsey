@@ -2,12 +2,6 @@ import itertools
 import numpy as np
 
 
-def euclidean_distance(matrix1, matrix2):
-    flattend_matrix1 = matrix1.flatten()
-    flattend_matrix2 = matrix2.flatten()
-    distance = np.linalg.norm(flattend_matrix1 - flattend_matrix2)
-    return distance
-
 def read_adjacency_matrix(file_path):
     adjacency_matrix = []
     with open(file_path, 'r') as file:
@@ -26,12 +20,11 @@ def generate_combinations(total, size):
     for indices in itertools.combinations(range(total), size):
         yield indices
 
-file_path = 'R(B3_B6_18).txt'
+file_path = 'adjcencyMatrix/T8.txt'
 original_matrix = read_adjacency_matrix(file_path)
 
-target_path = 'adjcencyMatrix/B3.txt'
+target_path = 'adjcencyMatrix/B11.txt'
 target_matrix = read_adjacency_matrix(target_path)
-    
 
 print(target_matrix)
 
@@ -42,33 +35,28 @@ print(inverted_matrix)
 # インデックスの組み合わせを生成
 target_rows = target_matrix.shape[0]
 
-
 count = 0
 inverted_count = 0
-bound_distance = 0
+
 # 生成された組み合わせを順にチェック
 indices_combinations = generate_combinations(len(original_matrix), target_rows)  # ジェネレータを生成
 for idx, indices in enumerate(indices_combinations):
     if idx % 1000 == 0:
         print(f"組み合わせ {idx}番目")
-    
+
     submatrix = original_matrix[np.ix_(indices, indices)]
-    distance = euclidean_distance(submatrix, target_matrix)
-    inverted_distance = euclidean_distance(submatrix, inverted_matrix)
     
-    if distance <= bound_distance:
+    if check_combination(submatrix, indices, target_matrix):
         count += 1
-        print("ユークリッド距離:", distance)
         print("選ばれたインデックス:", list(indices))
         print("選ばれた行と列だけを取り出した部分行列:")
         print(submatrix)
-        
-    if inverted_distance <= bound_distance:
+
+    if check_combination(submatrix, indices, inverted_matrix):
         inverted_count += 1
-        print("ユークリッド距離:", inverted_distance)
         print("選ばれたインデックス:", list(indices))
         print("選ばれた反転行列:")
         print(submatrix)
-    
-print(f"distance {bound_distance}以下のカウント数", count)
-print(f"inverted distance {bound_distance}以下のカウント数", inverted_count)
+
+print(f"一致するカウント数", count)
+print(f"反転一致するカウント数", inverted_count)
