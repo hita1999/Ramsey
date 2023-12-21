@@ -1,7 +1,7 @@
 import itertools
+import random
 import numpy as np
-import concurrent.futures
-import queue
+from multiprocessing import Pool, Manager
 
 def read_adjacency_matrix(file_path):
     adjacency_matrix = []
@@ -50,18 +50,14 @@ def swap_rows_and_columns(original_matrix, random_sequence):
 
     return original_matrix
 
-def process_single_matrix(task_queue, result_queue, original_matrix, target_matrix, inverted_matrix, target_rows, bound_distance):
-    while True:
-        try:
-            idx = task_queue.get_nowait()
-        except queue.Empty:
-            break
+def process_single_matrix(args):
+    idx, original_matrix, first_target_matrix, first_inverted_matrix, first_target_rows, bound_distance = args
 
-        new_sequence = generate_random_binary_sequence(len(original_matrix[idx][idx+1:]))
-        new_matrix = swap_rows_and_columns(original_matrix.copy(), new_sequence)
-        fisrt_count, first_inverted_count = check_combinations(new_matrix, target_matrix, inverted_matrix, target_rows, bound_distance)
+    new_sequence = generate_random_binary_sequence(len(original_matrix[idx][idx+1:]))
+    new_matrix = swap_rows_and_columns(original_matrix.copy(), new_sequence)
 
-        result_queue.put((fisrt_count, first_inverted_count, new_matrix))
+    fisrt_count, first_inverted_count = check_combinations(new_matrix, first_target_matrix, first_inverted_matrix, first_target_rows, bound_distance)
+    return idx, fisrt_count, first_inverted_count, new_matrix
 
 def main():
     file_path = 'adjcencyMatrix/K9_9-I.txt'
@@ -82,36 +78,36 @@ def main():
     bound_distance = 0
     count_sum = 1
 
-    task_queue = queue.Queue()
-    result_queue = queue.Queue()
+    with Manager() as manager:
+        task_queue = manager.Queue()
+        result_queue = manager.Queue()
 
-    # タスクをキューに追加
-    for idx in range(12):  # 12個のタスクを追加
-        task_queue.put(idx)
+        # タスクをキューに追加
+        for idx in range(12):  # 12個のタスクを追加
+            task_queue.put(idx)
 
-    # ワーカープロセスを複数立ち上げ
-    workers = [concurrent.futures.ThreadPoolExecutor(max_workers=1).submit(process_single_matrix, task_queue, result_queue, original_matrix, first_target_matrix, first_inverted_matrix, first_target_rows, bound_distance) for _ in range(12)]
+        # プールを作成
+        with Pool(processes=12) as pool:
+            while count_sum > 0:
+                args_list = [(idx, original_matrix, first_target_matrix, first_inverted_matrix, first_target_rows, bound_distance) for idx in range(12)]
 
-    # ワーカープロセスの完了待ち
-    concurrent.futures.wait(workers)
+                # マルチプロセスでタスクを実行
+                results = pool.map(process_single_matrix, args_list)
 
-    # 結果の取得
-    results = []
-    for _ in range(12):
-        fisrt_count, first_inverted_count, new_matrix = result_queue.get()
-        first_count_sum = min(fisrt_count, first_inverted_count)
+                for idx, fisrt_count, first_inverted_count, new_matrix in results:
+                    first_count_sum = min(fisrt_count, first_inverted_count)
 
-        if first_count_sum == 0:
-            second_count, second_inverted_count = check_combinations(new_matrix, second_target_matrix, second_inverted_matrix, second_target_rows, bound_distance)
+                    if first_count_sum == 0:
+                        second_count, second_inverted_count = check_combinations(new_matrix, second_target_matrix, second_inverted_matrix, second_target_rows, bound_distance)
 
-            if second_count == 0 and second_inverted_count == 0:
-                print("条件を満たすグラフが見つかりました")
-                save_matrix_to_txt(new_matrix, 'R(B3_B6_18).txt')
-                break
-            else:
-                print("条件を満たすグラフは見つかりませんでした")
-                original_matrix = new_matrix
-                continue
+                        if second_count == 0 and second_inverted_count == 0:
+                            print("条件を満たすグラフが見つかりました")
+                            save_matrix_to_txt(new_matrix, 'R(B3_B6_18).txt')
+                            return
+                        else:
+                            print("条件を満たすグラフは見つかりませんでした")
+                            original_matrix = new_matrix
+                            continue
 
 if __name__ == "__main__":
     main()
