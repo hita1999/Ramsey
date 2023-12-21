@@ -44,10 +44,10 @@ def read_adjacency_matrix(file_path):
             adjacency_matrix.append(row)
     return adjacency_matrix
 
-file_path = 'R(B3_B6_18).txt'
+file_path = 'adjcencyMatrix/B3.txt'
 adjacency_matrix = read_adjacency_matrix(file_path)
 
-selected_rows = [i for i in range(18)]
+selected_rows = [i for i in range(len(adjacency_matrix))]
 #selected_rows = [3, 5, 7, 12, 17]
 
 # 関数を呼び出して描画
