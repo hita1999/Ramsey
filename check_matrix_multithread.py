@@ -36,10 +36,10 @@ def find_satisfying_graph_parallel(args):
     return False
 
 def main():
-    file_path = 'adjcencyMatrix/T7.txt'
+    file_path = 'adjcencyMatrix/T9.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
-    first_target_path = 'targetAdjcencyMatrix/B7.txt'
+    first_target_path = 'targetAdjcencyMatrix/B11.txt'
     first_target_matrix = read_adjacency_matrix(first_target_path)
     first_target_rows = first_target_matrix.shape[0]
 
@@ -50,7 +50,7 @@ def main():
     args_list = [(original_matrix, first_target_matrix, first_target_rows),
                  (original_matrix, second_target_matrix, second_target_rows)]
 
-    with Pool(processes=8) as pool:
+    with Pool(processes=24) as pool:
         results = list(pool.imap_unordered(find_satisfying_graph_parallel, args_list))
 
     for idx, satisfying_graph_type in enumerate(results):
