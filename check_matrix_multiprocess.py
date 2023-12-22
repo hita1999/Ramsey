@@ -1,6 +1,7 @@
 import itertools
+from math import comb
 import numpy as np
-import multiprocessing
+from multiprocessing import Pool
 
 def read_adjacency_matrix(file_path):
     adjacency_matrix = []
@@ -10,57 +11,56 @@ def read_adjacency_matrix(file_path):
             adjacency_matrix.append(row)
     return np.array(adjacency_matrix)
 
+def check_combination(matrix, indices, target_matrix):
+    return np.array_equal(matrix[np.ix_(indices, indices)], target_matrix) or np.array_equal(matrix[np.ix_(indices, indices)], 1 - target_matrix)
+
 def generate_combinations(total, size):
-    for indices in itertools.combinations(range(total), size):
-        yield indices
+    return itertools.combinations(range(total), size)
 
-def check_combination(args):
-    original_matrix, target_matrix, inverted_matrix, target_rows, bound_distance = args
-    count = 0
-    inverted_count = 0
-    
-    indices_combinations = generate_combinations(len(original_matrix), target_rows)
-    
-    for idx, indices in enumerate(indices_combinations):
-        submatrix = original_matrix[np.ix_(indices, indices)]
-        
-        if np.array_equal(submatrix, target_matrix):
-            count += 1
-        elif np.array_equal(submatrix, inverted_matrix):
-            inverted_count += 1
+def save_matrix_to_txt(matrix, file_path):
+    np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
-    return count, inverted_count
+def find_satisfying_graph_parallel(args):
+    matrix, target_matrix, inverted_matrix, target_rows = args
+
+    for indices in generate_combinations(len(matrix), target_rows):
+        if check_combination(matrix, indices, target_matrix):
+            return "target_matrix"
+        elif check_combination(matrix, indices, inverted_matrix):
+            return "inverted_matrix"
+
+    return False
 
 def main():
-    file_path = 'adjcencyMatrix/T8.txt'
+    file_path = 'adjcencyMatrix/T9.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
-    target_path = 'targetAdjcencyMatrix/B2.txt'
-    target_matrix = read_adjacency_matrix(target_path)
+    first_target_path = 'targetAdjcencyMatrix/B6.txt'
+    first_target_matrix = read_adjacency_matrix(first_target_path)
+    first_inverted_matrix = 1 - first_target_matrix
+    np.fill_diagonal(first_inverted_matrix, 0)
+    first_target_rows = first_target_matrix.shape[0]
 
-    inverted_matrix = 1 - target_matrix
-    np.fill_diagonal(inverted_matrix, 0)
+    second_target_path = 'targetAdjcencyMatrix/B4.txt'
+    second_target_matrix = read_adjacency_matrix(second_target_path)
+    second_inverted_matrix = 1 - second_target_matrix
+    np.fill_diagonal(second_inverted_matrix, 0)
+    second_target_rows = second_target_matrix.shape[0]
 
-    # インデックスの組み合わせを生成
-    target_rows = target_matrix.shape[0]
+    args_list = [(original_matrix, first_target_matrix, first_inverted_matrix, first_target_rows),
+                 (original_matrix, second_target_matrix, second_inverted_matrix, second_target_rows)]
 
-    # CPUのコア数を取得
-    num_cores = multiprocessing.cpu_count()
+    with Pool() as pool:
+        results = list(pool.map(find_satisfying_graph_parallel, args_list))
 
-    # 引数リストを生成
-    args_list = [(original_matrix, target_matrix, inverted_matrix, target_rows, 0) for _ in range(num_cores)]
-
-    # プロセスプールを作成
-    with multiprocessing.Pool(processes=num_cores) as pool:
-        # 各プロセスに引数リストを渡して処理を実行
-        results = pool.map(check_combination, args_list)
-
-    # 結果を合算
-    total_count = sum(result[0] for result in results)
-    total_inverted_count = sum(result[1] for result in results)
-
-    print(f"distance 0以下のカウント数: {total_count}")
-    print(f"inverted distance 0以下のカウント数: {total_inverted_count}")
+    for idx, satisfying_graph_type in enumerate(results):
+        if satisfying_graph_type == "target_matrix":
+            print(f"{file_path}には{first_target_path if idx == 0 else second_target_path}が見つかりました")
+            print(f"{idx + 1}_graphにて条件を満たすグラフが見つかりました ({'first' if idx == 0 else 'second'}_target_matrix)")
+        elif satisfying_graph_type == "inverted_matrix":
+            print(f"{idx + 1}_graphにて条件を満たすグラフが見つかりました ({'first' if idx == 0 else 'second'}_inverted_matrix)")
+        else:
+            print(f"{file_path}には{first_target_path if idx == 0 else second_target_path}は見つかりませんでした")
 
 if __name__ == "__main__":
     main()
