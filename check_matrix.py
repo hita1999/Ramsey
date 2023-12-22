@@ -1,6 +1,7 @@
 import itertools
+from math import comb
 import numpy as np
-
+from tqdm import tqdm
 
 def read_adjacency_matrix(file_path):
     adjacency_matrix = []
@@ -10,53 +11,66 @@ def read_adjacency_matrix(file_path):
             adjacency_matrix.append(row)
     return np.array(adjacency_matrix)
 
-
 def check_combination(matrix, indices, target_matrix):
-    submatrix = matrix[np.ix_(indices, indices)]
-    return np.array_equal(submatrix, target_matrix) or np.array_equal(submatrix, 1 - target_matrix)
-
+    return np.array_equal(matrix[np.ix_(indices, indices)], target_matrix) or np.array_equal(matrix[np.ix_(indices, indices)], 1 - target_matrix)
 
 def generate_combinations(total, size):
-    for indices in itertools.combinations(range(total), size):
-        yield indices
+    return itertools.combinations(range(total), size)
 
-file_path = 'adjcencyMatrix/T8.txt'
-original_matrix = read_adjacency_matrix(file_path)
+def save_matrix_to_txt(matrix, file_path):
+    np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
-target_path = 'adjcencyMatrix/B11.txt'
-target_matrix = read_adjacency_matrix(target_path)
-
-print(target_matrix)
-
-inverted_matrix = 1 - target_matrix
-np.fill_diagonal(inverted_matrix, 0)
-print(inverted_matrix)
-
-# インデックスの組み合わせを生成
-target_rows = target_matrix.shape[0]
-
-count = 0
-inverted_count = 0
-
-# 生成された組み合わせを順にチェック
-indices_combinations = generate_combinations(len(original_matrix), target_rows)  # ジェネレータを生成
-for idx, indices in enumerate(indices_combinations):
-    if idx % 1000 == 0:
-        print(f"組み合わせ {idx}番目")
-
-    submatrix = original_matrix[np.ix_(indices, indices)]
+def find_satisfying_graph(matrix, target_matrix, inverted_matrix, target_rows):
+    original_matrix_number_of_rows = matrix.shape[0]
+    total_combinations = comb(original_matrix_number_of_rows, target_rows)
+    progress_bar = tqdm(total=total_combinations, desc="Finding satisfying graph")
     
-    if check_combination(submatrix, indices, target_matrix):
-        count += 1
-        print("選ばれたインデックス:", list(indices))
-        print("選ばれた行と列だけを取り出した部分行列:")
-        print(submatrix)
+    for indices in generate_combinations(len(matrix), target_rows):
+        progress_bar.update(1)  # 進捗を更新
+        if check_combination(matrix, indices, target_matrix):
+            progress_bar.close()  # 進捗バーを閉じる
+            return "target_matrix"
+        elif check_combination(matrix, indices, inverted_matrix):
+            progress_bar.close()  # 進捗バーを閉じる
+            return "inverted_matrix"
+    progress_bar.close()  # 進捗バーを閉じる
+    return False
 
-    if check_combination(submatrix, indices, inverted_matrix):
-        inverted_count += 1
-        print("選ばれたインデックス:", list(indices))
-        print("選ばれた反転行列:")
-        print(submatrix)
+def main():
+    file_path = 'adjcencyMatrix/T7.txt'
+    original_matrix = read_adjacency_matrix(file_path)
 
-print(f"一致するカウント数", count)
-print(f"反転一致するカウント数", inverted_count)
+    first_target_path = 'targetAdjcencyMatrix/B6.txt'
+    first_target_matrix = read_adjacency_matrix(first_target_path)
+    first_inverted_matrix = 1 - first_target_matrix
+    np.fill_diagonal(first_inverted_matrix, 0)
+    first_target_rows = first_target_matrix.shape[0]
+
+    second_target_path = 'targetAdjcencyMatrix/B3.txt'
+    second_target_matrix = read_adjacency_matrix(second_target_path)
+    second_inverted_matrix = 1 - second_target_matrix
+    np.fill_diagonal(second_inverted_matrix, 0)
+    second_target_rows = second_target_matrix.shape[0]
+    
+    satisfying_graph_type1 = find_satisfying_graph(original_matrix, first_target_matrix, first_inverted_matrix, first_target_rows)
+    satisfying_graph_type2 = find_satisfying_graph(original_matrix, second_target_matrix, second_inverted_matrix, second_target_rows)
+
+    if satisfying_graph_type1 == "target_matrix":
+        print(f"{file_path}には{first_target_path}が見つかりました")
+        print("first_graphにて条件を満たすグラフが見つかりました (first_target_matrix)")
+    elif satisfying_graph_type1 == "inverted_matrix":
+        print("first_graphにて条件を満たすグラフが見つかりました (first_inverted_matrix)")
+    else:
+        print(f"{file_path}には{first_target_path}は見つかりませんでした")
+        
+    if satisfying_graph_type2 == "target_matrix":
+        print(f"{file_path}には{second_target_path}が見つかりました")
+        print("second_graphにて条件を満たすグラフが見つかりました (second_target_matrix)")
+    elif satisfying_graph_type2 == "inverted_matrix":
+        print("second_graphにて条件を満たすグラフが見つかりました (second_inverted_matrix)")
+    else:
+        print(f"{file_path}には{second_target_path}は見つかりませんでした")
+        
+
+if __name__ == "__main__":
+    main()
