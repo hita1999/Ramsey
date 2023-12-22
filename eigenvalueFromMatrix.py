@@ -35,7 +35,9 @@ def visualize_eigenvectors(adj_matrix, eigenvectors):
 
 # メイン処理
 if __name__ == "__main__":
-    file_path = "adjcencyMatrix/R(4_8_57).txt"
+    file_path = "adjcencyMatrix/Paulus/srg(26_10_3_4)_1.txt"
     adj_matrix = read_adj_matrix(file_path)
     eigenvalues, eigenvectors = compute_eigenvectors(adj_matrix)
-    visualize_eigenvectors(adj_matrix, eigenvectors)
+    print(eigenvalues)
+    print(eigenvectors)
+    #visualize_eigenvectors(adj_matrix, eigenvectors)

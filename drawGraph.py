@@ -44,7 +44,7 @@ def read_adjacency_matrix(file_path):
             adjacency_matrix.append(row)
     return adjacency_matrix
 
-file_path = 'adjcencyMatrix/L2(4).txt'
+file_path = 'adjcencyMatrix/Paulus/srg(26_10_3_4)_1.txt'
 adjacency_matrix = read_adjacency_matrix(file_path)
 
 selected_rows = [i for i in range(len(adjacency_matrix))]
