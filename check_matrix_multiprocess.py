@@ -1,8 +1,7 @@
-from concurrent.futures import ThreadPoolExecutor
 import itertools
-from math import comb
-import os
 import numpy as np
+from multiprocessing import Pool, cpu_count
+from math import comb
 from tqdm import tqdm
 
 def read_adjacency_matrix(file_path):
@@ -12,15 +11,23 @@ def read_adjacency_matrix(file_path):
             row = [int(x) for x in line.strip()]
             adjacency_matrix.append(row)
     return np.array(adjacency_matrix)
-        
-def generate_matrix_candidates_with_progress(total, size):
-    total_combinations = comb(total, size)
-    for idx, indices in enumerate(tqdm(itertools.combinations(range(total), size), total=total_combinations, desc="Checking Matrix Candidates")):
-        yield indices
 
 def check_combination(matrix, indices, target_matrix):
     submatrix = matrix[np.ix_(indices, indices)]
     return np.array_equal(submatrix, target_matrix)
+
+def generate_matrix_candidates(total, size):
+    return itertools.combinations(range(total), size)
+
+def generate_matrix_candidates_with_progress(total, size):
+    total_combinations = comb(total, size)
+    chunk_size = total_combinations // cpu_count()
+    start = 0
+    end = chunk_size
+    for idx, indices in enumerate(tqdm(itertools.islice(generate_matrix_candidates(total, size), start, end), total=chunk_size, desc="Checking Matrix Candidates")):
+        yield indices
+        start = end
+        end += chunk_size
 
 def find_satisfying_graph_parallel(args):
     matrix, target_matrix, target_rows = args
@@ -46,18 +53,15 @@ def main():
     args_list = [(original_matrix, first_target_matrix, first_target_rows),
                  (original_matrix, second_target_matrix, second_target_rows)]
 
-    # CPUのコア数を取得
-    num_cores = os.cpu_count()
-
-    with ThreadPoolExecutor(max_workers=num_cores) as executor:
-        results = list(executor.map(find_satisfying_graph_parallel, args_list))
+    with Pool(processes=cpu_count()) as pool:
+        results = list(pool.imap_unordered(find_satisfying_graph_parallel, args_list))
 
     for idx, satisfying_graph_type in enumerate(results):
         if satisfying_graph_type == "target_matrix":
-            print(f"\n{file_path}には{first_target_path if idx == 0 else second_target_path}が見つかりました")
-            print(f"\n{idx + 1}_graphにて条件を満たすグラフが見つかりました ({'first' if idx == 0 else 'second'}_target_matrix)")
+            print(f"{file_path}には{first_target_path if idx == 0 else second_target_path}が見つかりました")
+            print(f"{idx + 1}_graphにて条件を満たすグラフが見つかりました ({'first' if idx == 0 else 'second'}_target_matrix)")
         else:
-            print(f"\n{file_path}には{first_target_path if idx == 0 else second_target_path}は見つかりませんでした")
+            print(f"{file_path}には{first_target_path if idx == 0 else second_target_path}は見つかりませんでした")
 
 if __name__ == "__main__":
     main()
