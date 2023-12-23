@@ -1,9 +1,11 @@
 import itertools
 from math import comb
+import os
 import numpy as np
 from multiprocessing import Pool
-from tqdm import tqdm
 import time
+
+from tqdm import tqdm
 
 def read_adjacency_matrix(file_path):
     adjacency_matrix = []
@@ -20,17 +22,16 @@ def check_combination(matrix, indices, target_matrix):
     submatrix = matrix[np.ix_(indices, indices)]
     return np.array_equal(submatrix, target_matrix)
 
-def find_satisfying_graph_parallel(args):
+def find_satisfying_graph(args):
     matrix, target_matrix, target_rows, start, end = args
 
     found = False
-    for idx, indices in enumerate(itertools.islice(itertools.combinations(range(len(matrix)), target_rows), start, end)):
-        if check_combination(matrix, indices, target_matrix):
-            found = True
-            break
-
-        # Update progress for each iteration
-        progress_bar.update(1)
+    with tqdm(total=end - start) as t:
+        for idx, indices in enumerate(itertools.islice(itertools.combinations(range(len(matrix)), target_rows), start, end)):
+            t.update(1)
+            if check_combination(matrix, indices, target_matrix):
+                found = True
+                break
 
     return found
 
@@ -38,34 +39,30 @@ def main():
     file_path = 'adjcencyMatrix/T9.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
-    first_target_path = 'targetAdjcencyMatrix/B11.txt'
+    first_target_path = 'targetAdjcencyMatrix/B6.txt'
     first_target_matrix = read_adjacency_matrix(first_target_path)
     first_target_rows = first_target_matrix.shape[0]
 
     total_combinations = comb(len(original_matrix), first_target_rows)
     
-    # 24 分割
-    num_processes = 24
+    # コア数 分割
+    num_processes = os.cpu_count()
     chunk_size = total_combinations // num_processes
     
+    pool = Pool(processes=num_processes)
+
     # 各プロセスに適切な範囲を割り当てる
     args_list = [
         (original_matrix, first_target_matrix, first_target_rows, start, start + chunk_size)
         for start in range(0, total_combinations, chunk_size)
     ]
 
-    # 進捗バーの作成
-    global progress_bar
-    progress_bar = tqdm(total=total_combinations, desc="Checking Matrix Candidates")
-
     start_time = time.time()
 
-    with Pool(processes=num_processes) as pool:
-        results = list(pool.imap(find_satisfying_graph_parallel, args_list))
+    # Manually update the progress
+    results = list(pool.imap_unordered(find_satisfying_graph, args_list))
 
     elapsed_time = time.time() - start_time
-
-    progress_bar.close()
 
     # Check results
     if any(results):
