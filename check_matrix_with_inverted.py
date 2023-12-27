@@ -4,7 +4,6 @@ import os
 import numpy as np
 from multiprocessing import Pool
 import time
-
 from tqdm import tqdm
 
 def read_adjacency_matrix(file_path):
@@ -25,23 +24,40 @@ def check_combination(matrix, indices, target_matrix):
 def find_satisfying_graph(args):
     matrix, target_matrix, target_rows, start, end = args
 
-    found = False
+    found_original = False
+    found_inverted = False
+
     with tqdm(total=end - start) as t:
         for idx, indices in enumerate(itertools.islice(itertools.combinations(range(len(matrix)), target_rows), start, end)):
             t.update(1)
+
             if check_combination(matrix, indices, target_matrix):
-                found = True
+                found_original = True
+
+            # Check the inverted matrix
+            inverted_matrix = 1 - matrix
+            np.fill_diagonal(inverted_matrix, 0)
+            if check_combination(inverted_matrix, indices, target_matrix):
+                found_inverted = True
+
+            # Break if either is found
+            if found_original or found_inverted:
                 break
 
-    return found
+    if found_original and found_inverted:
+        return "Both matrices found"
+    elif found_original:
+        return "Target matrix found"
+    elif found_inverted:
+        return "Inverted matrix found"
+    else:
+        return "No matrix found"
 
 def main():
-    file_path = 'adjcencyMatrix/R(4_8_57).txt'
-    file_path = 'adjcencyMatrix/T10.txt'
+    file_path = 'adjcencyMatrix/T7.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
-    first_target_path = 'adjcencyMatrix/K8.txt'
-    first_target_path = 'targetAdjcencyMatrix/B9.txt'
+    first_target_path = 'targetAdjcencyMatrix/B4.txt'
     first_target_matrix = read_adjacency_matrix(first_target_path)
     first_target_rows = first_target_matrix.shape[0]
 
@@ -67,9 +83,11 @@ def main():
     elapsed_time = time.time() - start_time
 
     # Check results
-    if any(results):
+    if any(result != "No matrix found" for result in results):
         print(f"{file_path}には{first_target_path}が見つかりました")
-        print("条件を満たすグラフが見つかりました (first_target_matrix)")
+        for idx, result in enumerate(results):
+            if result != "No matrix found":
+                print(f"条件を満たすグラフが見つかりました ({result}) - Process {idx + 1}")
     else:
         print(f"{file_path}には{first_target_path}は見つかりませんでした")
 
