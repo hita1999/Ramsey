@@ -36,12 +36,10 @@ def find_satisfying_graph(args):
     return found
 
 def main():
-    file_path = 'adjcencyMatrix/R(4_8_57).txt'
-    file_path = 'adjcencyMatrix/T10.txt'
+    file_path = 'adjcencyMatrix/Paley/Paley41.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
-    first_target_path = 'adjcencyMatrix/K8.txt'
-    first_target_path = 'targetAdjcencyMatrix/B9.txt'
+    first_target_path = 'adjcencyMatrix/complete/K10.txt'
     first_target_matrix = read_adjacency_matrix(first_target_path)
     first_target_rows = first_target_matrix.shape[0]
 
