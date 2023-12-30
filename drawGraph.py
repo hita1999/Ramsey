@@ -44,11 +44,11 @@ def read_adjacency_matrix(file_path):
             adjacency_matrix.append(row)
     return adjacency_matrix
 
-file_path = 'adjcencyMatrix/T9.txt'
+file_path = 'adjcencyMatrix/Paley/Paley37_2.txt'
 adjacency_matrix = read_adjacency_matrix(file_path)
 
 #selected_rows = [i for i in range(len(adjacency_matrix))]
-selected_rows = list((0, 1, 2, 3, 4, 5))
+selected_rows = list((0, 3, 4, 31))
 
 # 関数を呼び出して描画
 draw_subgraph(file_path, selected_rows, selected_rows)
