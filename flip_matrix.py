@@ -1,13 +1,13 @@
-from operator import index
-from os import read
-import re
-import sys
+import numpy as np
 
-from check_matrix import read_adjacency_matrix, save_matrix_to_txt
+from check_matrix import read_adjacency_matrix
+
+def save_matrix_to_txt(matrix, file_path):
+    np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
 def flip_matrix(matrix, i, j):
-    matrix[i][j] = '1' if matrix[i][j] == '0' else '0'
-    matrix[j][i] = '1' if matrix[j][i] == '0' else '0'
+    matrix[i][j] = 1 - matrix[i][j]
+    matrix[j][i] = 1 - matrix[j][i]
 
 def print_matrix(matrix):
     for row in matrix:
@@ -22,13 +22,13 @@ if __name__ == "__main__":
 
     # 行列の反転前の表示
     print("Original Matrix:")
-    print_matrix(matrix)
+    #print_matrix(matrix)
 
     # 指定されたインデックスの数値を反転
     flip_matrix(matrix, index_1, index_2)
 
     # 反転後の表示
-    print("\nMatrix after flipping at indices {} and {}:".format(index_1, index_2))
-    print_matrix(matrix)
+    print("Matrix after flipping at indices {} and {}:".format(index_1, index_2))
+    #print_matrix(matrix)
 
     save_matrix_to_txt(matrix, 'adjcencyMatrix/Paley/Paley37_2.txt')
