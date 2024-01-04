@@ -21,14 +21,14 @@ if __name__ == "__main__":
     index_2 = int(input("Enter the second index: "))
 
     # 行列の反転前の表示
-    print("Original Matrix:")
+    #print("Original Matrix:")
     #print_matrix(matrix)
 
     # 指定されたインデックスの数値を反転
     flip_matrix(matrix, index_1, index_2)
 
     # 反転後の表示
-    print("Matrix after flipping at indices {} and {}:".format(index_1, index_2))
+    print("Matrix after flipping at indices {} and {}".format(index_1, index_2))
     #print_matrix(matrix)
 
     save_matrix_to_txt(matrix, 'adjcencyMatrix/Paley/Paley37_2.txt')
