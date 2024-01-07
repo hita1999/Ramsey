@@ -54,10 +54,10 @@ def find_satisfying_graph(args):
         return "No matrix found"
 
 def main():
-    file_path = 'adjcencyMatrix/Cameron231.txt'
+    file_path = 'adjcencyMatrix/Paley/Paley17.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
-    first_target_path = 'adjcencyMatrix/complete/K7.txt'
+    first_target_path = 'targetAdjcencyMatrix/B3.txt'
     first_target_matrix = read_adjacency_matrix(first_target_path)
     first_target_rows = first_target_matrix.shape[0]
 
