@@ -1,3 +1,4 @@
+from hmac import new
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -19,9 +20,13 @@ def draw_subgraph(file_path, selected_rows, selected_cols):
 
     # 対象部分の隣接行列を取得
     selected_matrix = np.array([row[selected_cols] for row in np.array(adjacency_matrix)[selected_rows]])
-    print(selected_matrix)
+    #print(selected_matrix)
+    
+    #flip適用
+    #selected_matrix = flip_matrix(selected_matrix)
     
     modified_matrix = modify_matrix(selected_matrix)
+    print(modified_matrix)
 
     # グラフを作成
     G = nx.from_numpy_array(modified_matrix)
@@ -44,11 +49,17 @@ def read_adjacency_matrix(file_path):
             adjacency_matrix.append(row)
     return adjacency_matrix
 
+def flip_matrix(matrix):
+    new_matrix = 1 - matrix
+    np.fill_diagonal(new_matrix, 0)
+    return new_matrix
+
 file_path = 'adjcencyMatrix/Paley/Paley17.txt'
 adjacency_matrix = read_adjacency_matrix(file_path)
 
+
 #selected_rows = [i for i in range(len(adjacency_matrix))]
-selected_rows = list((0, 2, 10, 1, 9))
+selected_rows = list((0, 1, 2, 9, 10))
 
 # 関数を呼び出して描画
 draw_subgraph(file_path, selected_rows, selected_rows)

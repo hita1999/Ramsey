@@ -37,16 +37,16 @@ def find_satisfying_graph(matrix, target_matrix, inverted_matrix, target_rows):
     return False, 0
 
 def main():
-    file_path = 'adjcencyMatrix/K9_9-I.txt'
+    file_path = 'adjcencyMatrix/Paley/Paley17.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
-    first_target_path = 'targetAdjcencyMatrix/B6.txt'
+    first_target_path = 'targetAdjcencyMatrix/B3.txt'
     first_target_matrix = read_adjacency_matrix(first_target_path)
     first_inverted_matrix = 1 - first_target_matrix
     np.fill_diagonal(first_inverted_matrix, 0)
     first_target_rows = first_target_matrix.shape[0]
 
-    second_target_path = 'targetAdjcencyMatrix/B3.txt'
+    second_target_path = 'targetAdjcencyMatrix/B4.txt'
     second_target_matrix = read_adjacency_matrix(second_target_path)
     second_inverted_matrix = 1 - second_target_matrix
     np.fill_diagonal(second_inverted_matrix, 0)
