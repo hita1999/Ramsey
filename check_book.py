@@ -60,10 +60,12 @@ def print_results(file_path, target_path, result, ret_spine_indices, ret_page_in
         print("page_indices:", ret_page_indices)
         print("spine_indices:", ret_spine_indices)
         print("for drawing graph, please run drawGraph.py", ret_page_indices + ret_spine_indices)
+    else:
+        print(f"{file_path}には{target_path}が見つかりませんでした")
 
 
 def main():
-    file_path = 'adjcencyMatrix/Paley/Paley25.txt'
+    file_path = 'adjcencyMatrix/Paley/Paley29.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
     print("original_matrix")
