@@ -36,17 +36,15 @@ def add_vertex(original_matrix, add_num):
 def generate_combinations(total, size):
     return itertools.combinations(range(total), size)
 
-def condition_function_1(matrix, page_sum, page, spine):
-    return page_sum == 0 and matrix[np.ix_(spine, spine)].sum() == 2 and matrix[np.ix_(spine, page)].sum() == len(page) * 2
+def condition_function_1(matrix, page, spine):
+    return matrix[np.ix_(spine, spine)].sum() == 2 and matrix[np.ix_(spine, page)].sum() == len(page) * 2
 
 
-def condition_function_2(matrix, page_sum, page, spine):
-    return page_sum == len(page) ** 2 - len(page) and matrix[np.ix_(spine, spine)].sum() == 0 and matrix[np.ix_(spine, page)].sum() == 0
+def condition_function_2(matrix, page, spine):
+    return matrix[np.ix_(spine, spine)].sum() == 0 and matrix[np.ix_(spine, page)].sum() == 0
 
 def search_book(matrix, page, spine, condition_func):
-    page_sum = matrix[np.ix_(page, page)].sum()
-
-    if condition_func(matrix, page_sum, page, spine):
+    if condition_func(matrix, page, spine):
         #print("target_matrix found", page, spine)
         return True
 
@@ -58,10 +56,11 @@ def set_indices(target_matrix, target_size, condition_func):
         remaining_indices = set(range(len(target_matrix))) - set(page_indices)
 
         for spine_indices in generate_combinations(len(remaining_indices), 2):
-            result = search_book(target_matrix, page_indices, spine_indices, condition_func)
+            if set(spine_indices).isdisjoint(set(page_indices)):
+                result = search_book(target_matrix, page_indices, spine_indices, condition_func)
 
-            if result:
-                return [spine_indices, page_indices]
+                if result:
+                    return [spine_indices, page_indices]
 
     return []
 
