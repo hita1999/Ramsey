@@ -93,7 +93,7 @@ def search_Ramsey(original_matrix, first_target_size, second_target_size):
 
 
 def main():
-    file_path = 'adjcencyMatrix/Paley/Paley9.txt'
+    file_path = 'adjcencyMatrix/Paley/Paley13.txt'
     original_matrix = read_adjacency_matrix(file_path)
     
     print("original_matrix")
