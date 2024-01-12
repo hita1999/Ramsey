@@ -65,7 +65,7 @@ def print_results(file_path, target_path, result, ret_spine_indices, ret_page_in
 
 
 def main():
-    file_path = 'adjcencyMatrix/Paley/Paley17.txt'
+    file_path = 'generatedMatrix/L2(4)_add_17476.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
     print("original_matrix")

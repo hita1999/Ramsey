@@ -35,7 +35,7 @@ def add_vertex(original_matrix, add_num):
     #print(new_matrix)
     return new_matrix
 
-file_path = 'adjcencyMatrix/Paley/Paley9.txt'
+file_path = 'adjcencyMatrix/LatticeGraph/L2(4).txt'
 original_matrix = read_adjacency_matrix(file_path)
 
 file_name, _ = os.path.splitext(os.path.basename(file_path))

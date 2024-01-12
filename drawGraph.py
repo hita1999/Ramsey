@@ -54,12 +54,12 @@ def flip_matrix(matrix):
     np.fill_diagonal(new_matrix, 0)
     return new_matrix
 
-file_path = 'generatedMatrix/Paley9_add_6.txt'
+file_path = 'adjcencyMatrix/LatticeGraph/L2(4).txt'
 adjacency_matrix = read_adjacency_matrix(file_path)
 
 
 #selected_rows = [i for i in range(len(adjacency_matrix))]
-selected_rows = list((6,7,8,9))
+selected_rows = list((0,8,4,12))
 
 # 関数を呼び出して描画
 draw_subgraph(file_path, selected_rows, selected_rows)
