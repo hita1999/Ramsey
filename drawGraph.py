@@ -11,7 +11,7 @@ def modify_matrix(matrix):
     for i in range(rows):
         for j in range(cols):
             if i != j and modified_matrix[i, j] == 0:
-                modified_matrix[i, j] = 2
+                modified_matrix[i, j] = 0
 
     return modified_matrix
 
@@ -23,7 +23,7 @@ def draw_subgraph(file_path, selected_rows, selected_cols):
     #print(selected_matrix)
     
     #flip適用
-    #selected_matrix = flip_matrix(selected_matrix)
+    selected_matrix = flip_matrix(selected_matrix)
     
     modified_matrix = modify_matrix(selected_matrix)
     print(modified_matrix)
@@ -35,7 +35,7 @@ def draw_subgraph(file_path, selected_rows, selected_cols):
     weights = nx.get_edge_attributes(G, 'weight')
     colors = ['red' if weights[e] == 1 else 'blue' for e in G.edges]
 
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(5, 5))
     pos = nx.circular_layout(G)
     nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=1000, edge_color=colors, width=2.0)
     plt.show()
@@ -54,12 +54,12 @@ def flip_matrix(matrix):
     np.fill_diagonal(new_matrix, 0)
     return new_matrix
 
-file_path = 'adjcencyMatrix/LatticeGraph/L2(4).txt'
+file_path = 'adjcencyMatrix/Paley/Paley17.txt'
 adjacency_matrix = read_adjacency_matrix(file_path)
 
 
 #selected_rows = [i for i in range(len(adjacency_matrix))]
-selected_rows = list((0,8,4,12))
+selected_rows = list((0,2,3,10,2,10))
 
 # 関数を呼び出して描画
 draw_subgraph(file_path, selected_rows, selected_rows)

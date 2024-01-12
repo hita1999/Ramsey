@@ -24,7 +24,7 @@ def flip_matrix(matrix):
     np.fill_diagonal(new_matrix, 0)
     return new_matrix
 
-matrix = read_adjacency_matrix('generatedMatrix/L2(4)_add_17476.txt')
+matrix = read_adjacency_matrix('generatedMatrix/Paley17_add_93495.txt')
 
 matrix = flip_matrix(matrix)
 print(matrix)

@@ -18,19 +18,18 @@ def generate_combinations(total, size):
 
 
 def search_book(matrix, page, spine, condition_func):
-    page_sum = matrix[np.ix_(page, page)].sum()
 
-    if condition_func(matrix, page_sum, page, spine):
+    if condition_func(matrix, page, spine):
         print("target_matrix found", page, spine)
         return True
 
 
-def condition_function_1(matrix, page_sum, page, spine):
-    return page_sum == 0 and matrix[np.ix_(spine, spine)].sum() == 2 and matrix[np.ix_(spine, page)].sum() == len(page) * 2
+def condition_function_1(matrix, page, spine):
+    return matrix[np.ix_(spine, spine)].sum() == 2 and matrix[np.ix_(spine, page)].sum() == len(page) * 2
 
 
-def condition_function_2(matrix, page_sum, page, spine):
-    return page_sum == len(page) ** 2 - len(page) and matrix[np.ix_(spine, spine)].sum() == 0 and matrix[np.ix_(spine, page)].sum() == 0
+def condition_function_2(matrix, page, spine):
+    return matrix[np.ix_(spine, spine)].sum() == 0 and matrix[np.ix_(spine, page)].sum() == 0
 
 
 
@@ -45,9 +44,10 @@ def find_satisfying_graph(original_matrix, target_size, condition_func):
 
         for spine_indices in generate_combinations(len(remaining_indices), 2):
             progress_bar.update(1)
-            if search_book(original_matrix, page_indices, spine_indices, condition_func):
-                progress_bar.close()
-                return 1, spine_indices, page_indices
+            if set(spine_indices).isdisjoint(set(page_indices)):
+                if search_book(original_matrix, page_indices, spine_indices, condition_func):
+                    progress_bar.close()
+                    return 1, spine_indices, page_indices
 
     progress_bar.close()
     return 0, 0, 0
@@ -65,7 +65,7 @@ def print_results(file_path, target_path, result, ret_spine_indices, ret_page_in
 
 
 def main():
-    file_path = 'generatedMatrix/L2(4)_add_17476.txt'
+    file_path = 'adjcencyMatrix/LatticeGraph/L2(4).txt'
     original_matrix = read_adjacency_matrix(file_path)
 
     print("original_matrix")
