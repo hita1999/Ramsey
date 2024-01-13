@@ -1,16 +1,16 @@
-all_elements = set(range(2**9))
+all_elements = set(range(2**16))
 
 result1_set = set()
 result2_set = set()
 
 current_result_set = None
 
-with open('searchResultTextFile/add1vertex_Paley9_B2_B3.txt', 'r') as file:
+with open('searchResultTextFile/add1vertex_L2(4)_B4_B5.txt', 'r') as file:
     for line in file:
         line = line.strip()
-        if line.startswith('Result 1 B2:'):
+        if line.startswith('Result 1 B4:'):
             current_result_set = result1_set
-        elif line.startswith('Result 2 B3:'):
+        elif line.startswith('Result 2 B5:'):
             current_result_set = result2_set
         else:
             values = line.split(',')
@@ -28,6 +28,6 @@ print("True Count 2:", len(result2_set))
 # set1およびset2に属さない要素を抽出
 not_in_either = all_elements - (result1_set.union(result2_set))
 
-print(not_in_either)
+print("index to make new matrix: ",not_in_either)
 
 
