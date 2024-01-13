@@ -13,8 +13,8 @@ def read_adjacency_matrix(file_path):
     return np.array(adjacency_matrix)
 
 
-def generate_combinations(total, size):
-    return itertools.combinations(range(total), size)
+def generate_combinations(elements, size):
+    return itertools.combinations(elements, size)
 
 
 def search_book(matrix, page, spine, condition_func):
@@ -39,10 +39,12 @@ def find_satisfying_graph(original_matrix, target_size, condition_func):
 
     progress_bar = tqdm(total=total_combinations, desc="Finding satisfying graph")
 
-    for page_indices in generate_combinations(len(original_matrix), target_size):
+    for page_indices in generate_combinations(range(len(original_matrix)), target_size):
+        print("page_indices", page_indices)
         remaining_indices = set(range(len(original_matrix))) - set(page_indices)
 
-        for spine_indices in generate_combinations(len(remaining_indices), 2):
+        for spine_indices in generate_combinations(remaining_indices, 2):
+            print("spine_indices", spine_indices)
             progress_bar.update(1)
             if set(spine_indices).isdisjoint(set(page_indices)):
                 if search_book(original_matrix, page_indices, spine_indices, condition_func):
@@ -62,13 +64,21 @@ def print_results(file_path, target_path, result, ret_spine_indices, ret_page_in
         print("for drawing graph, please run drawGraph.py", ret_page_indices + ret_spine_indices)
     else:
         print(f"{file_path}には{target_path}が見つかりませんでした")
+        
+
+def flip_matrix(matrix):
+    new_matrix = 1 - matrix
+    np.fill_diagonal(new_matrix, 0)
+    return new_matrix
 
 
 def main():
-    file_path = 'adjcencyMatrix/Paley/Paley13.txt'
+    file_path = 'generatedMatrix/Paley17_add_0.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
-    print("original_matrix")
+
+    #original_matrix = flip_matrix(original_matrix)
+    print("matrix", original_matrix)
     first_target_size = int(input("first_target_book: "))
     second_target_size = int(input("second_target_book: "))
 

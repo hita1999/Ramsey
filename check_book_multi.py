@@ -17,16 +17,15 @@ def multi_generate_combinations(total, size, start, end):
     return itertools.islice(itertools.combinations(range(total), size), start, end)
 
 def search_book(matrix, page, spine, condition_func):
-    page_sum = matrix[np.ix_(page, page)].sum()
 
-    if condition_func(matrix, page_sum, page, spine):
+    if condition_func(matrix, page, spine):
         return True
 
-def condition_function_1(matrix, page_sum, page, spine):
-    return page_sum == 0 and matrix[np.ix_(spine, spine)].sum() == 2 and matrix[np.ix_(spine, page)].sum() == len(page) * 2
+def condition_function_1(matrix, page, spine):
+    return matrix[np.ix_(spine, spine)].sum() == 2 and matrix[np.ix_(spine, page)].sum() == len(page) * 2
 
-def condition_function_2(matrix, page_sum, page, spine):
-    return page_sum == len(page) ** 2 - len(page) and matrix[np.ix_(spine, spine)].sum() == 0 and matrix[np.ix_(spine, page)].sum() == 0
+def condition_function_2(matrix, page, spine):
+    return matrix[np.ix_(spine, spine)].sum() == 0 and matrix[np.ix_(spine, page)].sum() == 0
 
 def find_satisfying_graph_partial(args):
     original_matrix, target_size, condition_func, start, end = args
@@ -37,9 +36,10 @@ def find_satisfying_graph_partial(args):
 
         for spine_indices in itertools.combinations(remaining_indices, 2):
             progress_bar.update(1)
-            if search_book(original_matrix, page_indices, spine_indices, condition_func):
-                progress_bar.close()
-                return 1, spine_indices, page_indices
+            if set(spine_indices).isdisjoint(set(page_indices)):
+                if search_book(original_matrix, page_indices, spine_indices, condition_func):
+                    progress_bar.close()
+                    return 1, spine_indices, page_indices
     
     progress_bar.close()
     return 0, 0, 0
@@ -71,7 +71,7 @@ def print_results(file_path, target_path, result, ret_spine_indices, ret_page_in
         print("for drawing graph, please run drawGraph.py", ret_page_indices + ret_spine_indices)
 
 def main():
-    file_path = 'adjcencyMatrix/Paley/Paley17.txt'
+    file_path = 'adjcencyMatrix/Paley/Paley25.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
     print("original_matrix")
