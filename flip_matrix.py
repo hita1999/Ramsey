@@ -1,6 +1,6 @@
 import numpy as np
 
-from check_matrix import read_adjacency_matrix
+from check_book import read_adjacency_matrix
 
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
@@ -15,7 +15,7 @@ def print_matrix(matrix):
 
 if __name__ == "__main__":
     # ファイルから行列を読み込むなどのコードが必要な場合はここに追加
-    matrix = read_adjacency_matrix('adjcencyMatrix/Paley/Paley37_2.txt')
+    matrix = read_adjacency_matrix('adjcencyMatrix/Paley/Paley17_2.txt')
 
     index_1 = int(input("Enter the first index: "))
     index_2 = int(input("Enter the second index: "))
@@ -31,4 +31,4 @@ if __name__ == "__main__":
     print("Matrix after flipping at indices {} and {}".format(index_1, index_2))
     #print_matrix(matrix)
 
-    save_matrix_to_txt(matrix, 'adjcencyMatrix/Paley/Paley37_2.txt')
+    save_matrix_to_txt(matrix, 'adjcencyMatrix/Paley/Paley17_2.txt')

@@ -24,12 +24,12 @@ def flip_matrix(matrix):
     np.fill_diagonal(new_matrix, 0)
     return new_matrix
 
-matrix = read_adjacency_matrix('generatedMatrix/Paley17_add_93495.txt')
+matrix = read_adjacency_matrix('adjcencyMatrix/Paley/Paley17.txt')
 
-matrix = flip_matrix(matrix)
+#matrix = flip_matrix(matrix)
 print(matrix)
 
-clique_size = 4
+clique_size = 3
 
 result = find_clique(matrix, clique_size)
 
