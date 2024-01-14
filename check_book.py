@@ -73,7 +73,7 @@ def flip_matrix(matrix):
 
 
 def main():
-    file_path = 'generatedMatrix/Paley9_add_0_recolor_target_<function swap_edge at 0x102360ae0>_idx_255.txt'
+    file_path = 'adjcencyMatrix/Paley/Paley17_2.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
 
