@@ -22,12 +22,12 @@ def swap_edge(original_matrix, swap_target_index, idx):
     
     swap_list = integer_to_binary(swap_target_index, idx)
     swap_list = np.array([swap_list])
-    print(swap_list)
+    #print(swap_list)
     
     original_matrix[swap_target_index, 0:swap_target_index] = swap_list
     original_matrix[0:swap_target_index, swap_target_index] = swap_list
     
-    print(original_matrix)
+    #print(original_matrix)
     
     return original_matrix
 
