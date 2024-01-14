@@ -40,11 +40,11 @@ def find_satisfying_graph(original_matrix, target_size, condition_func):
     progress_bar = tqdm(total=total_combinations, desc="Finding satisfying graph")
 
     for page_indices in generate_combinations(range(len(original_matrix)), target_size):
-        print("page_indices", page_indices)
+        #print("page_indices", page_indices)
         remaining_indices = set(range(len(original_matrix))) - set(page_indices)
 
         for spine_indices in generate_combinations(remaining_indices, 2):
-            print("spine_indices", spine_indices)
+            #print("spine_indices", spine_indices)
             progress_bar.update(1)
             if set(spine_indices).isdisjoint(set(page_indices)):
                 if search_book(original_matrix, page_indices, spine_indices, condition_func):
@@ -73,7 +73,7 @@ def flip_matrix(matrix):
 
 
 def main():
-    file_path = 'generatedMatrix/Paley17_add_0.txt'
+    file_path = 'generatedMatrix/Paley9_add_0_recolor_target_<function swap_edge at 0x102360ae0>_idx_255.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
 

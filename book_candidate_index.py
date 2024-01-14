@@ -1,4 +1,4 @@
-all_elements = set(range(2**16))
+all_elements = set(range(2**17))
 
 result1_set = set()
 result2_set = set()

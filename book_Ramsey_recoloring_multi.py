@@ -18,19 +18,18 @@ def integer_to_binary(original_matrix_size, add_num):
     return binary_list
     
 
-def add_vertex(original_matrix, add_num):
-    add_list = integer_to_binary(original_matrix.shape[0], add_num)
-    add_list = np.array([add_list])
-    new_matrix = np.vstack((original_matrix, add_list))
+def swap_edge(original_matrix, swap_target_index, idx):
     
-    # 新しい頂点との接続関係を設定
-    add_list = np.append(add_list, 0)
+    swap_list = integer_to_binary(swap_target_index, idx)
+    swap_list = np.array([swap_list])
+    print(swap_list)
     
-    # 行列に追加
-    new_matrix = np.hstack((new_matrix, add_list.reshape(-1, 1)))
+    original_matrix[swap_target_index, 0:swap_target_index] = swap_list
+    original_matrix[0:swap_target_index, swap_target_index] = swap_list
     
-    #print(new_matrix)
-    return new_matrix
+    print(original_matrix)
+    
+    return original_matrix
 
 def generate_combinations(elements, size):
     return itertools.combinations(elements, size)
@@ -66,8 +65,8 @@ def set_indices(target_matrix, target_size, condition_func):
 
 
 def process_search(args):
-    original_matrix, first_target_size, second_target_size, i = args
-    target_matrix = add_vertex(original_matrix, i)
+    original_matrix, first_target_size, second_target_size, swap_target_index , i = args
+    target_matrix = swap_edge(original_matrix, swap_target_index , i)
         
     result1 = set_indices(target_matrix, first_target_size, condition_function_1)
     if result1:
@@ -84,11 +83,11 @@ def process_search(args):
     return result1, count_true_total_1, result2, count_true_total_2
 
 
-def search_Ramsey_parallel(original_matrix, first_target_size, second_target_size):
-    total_iterations = 2 ** original_matrix.shape[0]
+def search_Ramsey_parallel(original_matrix, first_target_size, second_target_size, swap_target_index):
+    total_iterations = 2 ** swap_target_index
     progressbar = tqdm(total=total_iterations, desc="Finding satisfying graph")
 
-    args_list = [(original_matrix, first_target_size, second_target_size, i) for i in range(total_iterations)]
+    args_list = [(original_matrix, first_target_size, second_target_size, swap_target_index , i) for i in range(total_iterations)]
 
     with Pool(cpu_count()) as pool:
         results = list(tqdm(pool.imap(process_search, args_list), total=total_iterations))
@@ -103,19 +102,20 @@ def search_Ramsey_parallel(original_matrix, first_target_size, second_target_siz
 
 
 def main():
-    file_path = 'adjcencyMatrix/Paley/Paley9.txt'
+    file_path = 'generatedMatrix/Paley9_add_0.txt'
     original_matrix = read_adjacency_matrix(file_path)
     
     print("original_matrix")
     first_target_size = int(input("first_target_book: "))
     second_target_size = int(input("second_target_book: "))
+    swap_target_index = int(input("Enter the index to swap rows and columns: "))
     
-    res1, count_true_total_1, res2, count_true_total_2 = search_Ramsey_parallel(original_matrix, first_target_size, second_target_size)
+    res1, count_true_total_1, res2, count_true_total_2 = search_Ramsey_parallel(original_matrix, first_target_size, second_target_size, swap_target_index)
     
     
     file_name, _ = os.path.splitext(os.path.basename(file_path))
     # Open a file in write mode
-    with open(f'searchResultTextFile/add1vertex_{file_name}_B{first_target_size}_B{second_target_size}.txt', 'w') as file:
+    with open(f'searchResultTextFile/recoloring_{swap_target_index}_{file_name}_B{first_target_size}_B{second_target_size}.txt', 'w') as file:
 
         # Result 1
         file.write(f"Result 1 B{first_target_size}:\n")
