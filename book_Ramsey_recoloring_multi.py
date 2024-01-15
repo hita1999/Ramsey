@@ -34,33 +34,16 @@ def swap_edge(original_matrix, swap_target_index, idx):
 def generate_combinations(elements, size):
     return itertools.combinations(elements, size)
 
-def condition_function_1(matrix, page, spine):
-    return matrix[np.ix_(spine, spine)].sum() == 2 and matrix[np.ix_(spine, page)].sum() == len(page) * 2
 
-
-def condition_function_2(matrix, page, spine):
-    return matrix[np.ix_(spine, spine)].sum() == 0 and matrix[np.ix_(spine, page)].sum() == 0
-
-def search_book(matrix, page, spine, condition_func):
-
-    if condition_func(matrix, page, spine):
-        #print("target_matrix found", page, spine)
-        return True
-
-    return False
-    
-def set_indices(target_matrix, target_size, condition_func):
-    for page_indices in generate_combinations(range(len(target_matrix)), target_size):
-
-        remaining_indices = set(range(len(target_matrix))) - set(page_indices)
-
-        for spine_indices in generate_combinations(remaining_indices, 2):
-            if set(spine_indices).isdisjoint(set(page_indices)):
-                result = search_book(target_matrix, page_indices, spine_indices, condition_func)
-
-                if result:
-                    return [spine_indices, page_indices]
-
+def set_indices(target_matrix, target_size, condition):
+    for spine_indices in generate_combinations(range(len(target_matrix)), 2):
+        if target_matrix[np.ix_(spine_indices, spine_indices)].sum() == condition:
+            remaining_indices = set(range(len(target_matrix))) - set(spine_indices)
+            
+            for page_indices in generate_combinations(remaining_indices, target_size):
+                if set(spine_indices).isdisjoint(set(page_indices)):
+                    if target_matrix[np.ix_(spine_indices, page_indices)].sum() == len(page_indices) * condition:
+                        return [spine_indices, page_indices]
     return []
 
 
@@ -68,13 +51,13 @@ def process_search(args):
     original_matrix, first_target_size, second_target_size, swap_target_index , i = args
     target_matrix = swap_edge(original_matrix, swap_target_index , i)
         
-    result1 = set_indices(target_matrix, first_target_size, condition_function_1)
+    result1 = set_indices(target_matrix, first_target_size, 2)
     if result1:
         count_true_total_1 = 1
     else:
         count_true_total_1 = 0
 
-    result2 = set_indices(target_matrix, second_target_size, condition_function_2)
+    result2 = set_indices(target_matrix, second_target_size, 0)
     if result2:
         count_true_total_2 = 1
     else:
@@ -102,7 +85,7 @@ def search_Ramsey_parallel(original_matrix, first_target_size, second_target_siz
 
 
 def main():
-    file_path = 'generatedMatrix/Paley9_add_0.txt'
+    file_path = 'adjcencyMatrix/Paley/Paley9_double18.txt'
     original_matrix = read_adjacency_matrix(file_path)
     
     print("original_matrix")
