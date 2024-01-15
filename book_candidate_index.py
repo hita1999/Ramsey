@@ -5,7 +5,7 @@ result2_set = set()
 
 current_result_set = None
 
-with open('searchResultTextFile/add1vertex_Paley17_B4_B5.txt', 'r') as file:
+with open('searchResultTextFile/add1vertex_Paley17_recolor_target_15_idx_13506_B4_B5.txt', 'r') as file:
     for line in file:
         line = line.strip()
         if line.startswith('Result 1 B4:'):
@@ -19,11 +19,11 @@ with open('searchResultTextFile/add1vertex_Paley17_B4_B5.txt', 'r') as file:
                 if index_value.isdigit():
                     current_result_set.add(int(index_value))
 
-print("Result 1 Set:", result1_set)
+#print("Result 1 Set:", result1_set)
 print("True Count 1:", len(result1_set))
 
-print("\nResult 2 Set:", result2_set)
-#print("True Count 2:", len(result2_set))
+#print("\nResult 2 Set:", result2_set)
+print("True Count 2:", len(result2_set))
 
 # set1およびset2に属さない要素を抽出
 not_in_either = all_elements - (result1_set.union(result2_set))
