@@ -1,9 +1,9 @@
 from multiprocessing import Pool, cpu_count
-from functools import partial
 from tqdm import tqdm
 import numpy as np
 from scipy.linalg import circulant
 from numba import jit
+
 
 @jit(nopython=True)
 def generate_combinations(elements, size):
@@ -53,6 +53,7 @@ def set_indices(target_matrix, target_size, condition):
     
     return 1
 
+
 @jit(nopython=True)
 def integer_to_binary(cir_size):
     binary_list = []
@@ -67,53 +68,50 @@ def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
 
-def calculate_A(args):
-    matrix_list, matrix, first_target_size, second_target_size = args
+def main():
+
+    first_target_size = int(input("first_target_book: "))
+    second_target_size = int(input("second_target_book: "))
+    matrix_size = 14
+    
+    matrix_list = integer_to_binary(int(matrix_size/2))
+    print('Max',len(matrix_list)**3)
+    
     counter = 0
-    C1 = circulant(matrix)
-    C1 = np.triu(C1) + np.triu(C1, 1).T
-    for matrix2 in matrix_list:
-        C2 = circulant(matrix2)
-        C2 = np.triu(C2) + np.triu(C2, 1).T
-        for matrix3 in matrix_list:
-            C3 = circulant(matrix3)
-            C3 = np.triu(C3) + np.triu(C3, 1).T
-            B1 = np.hstack((C1, C2))
-            B2 = np.hstack((C2.T, C3))
-            A = np.vstack((B1, B2))
-            counter += 1
+    
+    progressbar = tqdm(total=len(matrix_list)**3, desc="Finding satisfying graph")
+    
+    for matrix in matrix_list:
+        C1 = circulant(matrix)
+        C1 = np.triu(C1) + np.triu(C1, 1).T
+        for matrix2 in matrix_list:
+            C2 = circulant(matrix2)
+            C2 = np.triu(C2) + np.triu(C2, 1).T
+            for matrix3 in matrix_list:
+                C3 = circulant(matrix3)
+                C3 = np.triu(C3) + np.triu(C3, 1).T
+                B1 = np.hstack((C1, C2))
+                B2 = np.hstack((C2.T, C3))
+                A = np.vstack((B1, B2))
+                counter += 1
+                progressbar.update(1)
                 
-            ret = set_indices(A, first_target_size, 2)
-            ret2 = set_indices(A, second_target_size, 0)
+                ret = set_indices(A, first_target_size, 2)
+                ret2 = set_indices(A, second_target_size, 0)
+                if ret + ret2 == 2:
+                    print('found!')
+                    print(ret)
+                    print(A)
+                    save_matrix_to_txt(A, 'generatedMatrix/circulantBlock/circulantBlock.txt')
+                    print(matrix)
+                    print(matrix2)
+                    print(matrix3)
+                    break
             if ret + ret2 == 2:
-                print('found!')
-                print(ret)
-                print(A)
-                save_matrix_to_txt(A, f'generatedMatrix/circulantBlock/circulantBlock_{counter}.txt')
-                print(matrix)
-                print(matrix2)
-                print(matrix3)
                 break
         if ret + ret2 == 2:
             break
-    return counter
-
-def main():
-    first_target_size = int(input("first_target_book: "))
-    second_target_size = int(input("second_target_book: "))
-    matrix_size = 16
-    
-    matrix_list = integer_to_binary(int(matrix_size/2))
-    print('Max', len(matrix_list)**3)
-    
-    counter = 0
-    
-    # Create a Pool of workers
-    with Pool() as pool:
-        args_list = [(matrix_list, matrix, first_target_size, second_target_size) for matrix in matrix_list]
-        for result in tqdm(pool.imap_unordered(calculate_A, args_list), total=len(matrix_list), desc="Finding satisfying graph"):
-            counter += result
-
+    progressbar.close()
     print(counter)
     if counter == len(matrix_list)**3:
         print('not found')
