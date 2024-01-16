@@ -69,7 +69,7 @@ def main():
 
     first_target_size = int(input("first_target_book: "))
     second_target_size = int(input("second_target_book: "))
-    matrix_size = 10
+    matrix_size = 12
     
     matrix_list = integer_to_binary(int(matrix_size/2))
     print('Max',len(matrix_list)**3)
@@ -109,6 +109,8 @@ def main():
             break
     progressbar.close()
     print(counter)
+    if counter == len(matrix_list)**3:
+        print('not found')
 
 if __name__ == "__main__":
     main()
