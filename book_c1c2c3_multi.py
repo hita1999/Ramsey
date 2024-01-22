@@ -42,16 +42,32 @@ def numba_ix(matrix, rows, cols):
 
 @jit(nopython=True)
 def set_indices(target_matrix, target_size, condition):
-    for spine_indices in generate_combinations(np.arange(len(target_matrix)), 2):
-        if numba_ix(target_matrix, spine_indices, spine_indices).sum() == condition:
-            all_indices = np.concatenate((np.arange(len(target_matrix)), spine_indices))
-            remaining_indices = np.array([idx for idx in all_indices if idx not in spine_indices])
+    n = len(target_matrix)
+    ret = -1
+
+    for i in range(n - 1):
+        for j in range(i + 1, n):
+            spine_indices = np.array([i, j], dtype=np.int64)
+
+            row_1 = target_matrix[spine_indices[0], :]
+            row_2 = target_matrix[spine_indices[1], :]
             
-            for page_indices in generate_combinations(remaining_indices, target_size):
-                if numba_ix(target_matrix, spine_indices, page_indices).sum() == len(page_indices) * condition:
-                    return 0
-    
-    return 1
+            if condition == 2 and (target_matrix[i, j] == 1):
+                common_vertices = np.where((row_1 == 1) & (row_2 == 1))[0]
+                if len(common_vertices) < target_size:
+                    ret = 0
+                else:
+                    return -1
+
+            if condition == 0 and (target_matrix[i, j] == 0):
+                common_vertices = np.where((row_1 == 0) & (row_2 == 0))[0]
+                common_vertices = np.array([x for x in common_vertices if x not in spine_indices])
+                if len(common_vertices) < target_size:
+                    ret = 0
+                else:
+                    return -1
+
+    return ret
 
 @jit(nopython=True)
 def integer_to_binary(cir_size):
@@ -84,24 +100,25 @@ def calculate_A(args):
             counter += 1
                 
             ret = set_indices(A, first_target_size, 2)
-            ret2 = set_indices(A, second_target_size, 0)
-            if ret + ret2 == 2:
-                print('found!')
-                print(ret)
-                print(A)
-                save_matrix_to_txt(A, f'generatedMatrix/circulantBlock/circulantBlock_{counter}.txt')
-                print(matrix)
-                print(matrix2)
-                print(matrix3)
+            if ret == 0:
+                ret2 = set_indices(A, second_target_size, 0)
+                if ret2 == 0:
+                    print('found!')
+                    print(ret)
+                    print(A)
+                    save_matrix_to_txt(A, f'generatedMatrix/circulantBlock/circulantBlock_{counter}.txt')
+                    print(matrix)
+                    print(matrix2)
+                    print(matrix3)
+                    break
+        if ret == 0:
                 break
-        if ret + ret2 == 2:
-            break
     return counter
 
 def main():
     first_target_size = int(input("first_target_book: "))
     second_target_size = int(input("second_target_book: "))
-    matrix_size = 16
+    matrix_size = 14
     
     matrix_list = integer_to_binary(int(matrix_size/2))
     print('Max', len(matrix_list)**3)
