@@ -52,14 +52,14 @@ def calculate_A_batch(args):
     for i in range(start, end):
         if i >= 2**(matrix_size-1):
             break
-        matrix = integer_to_binary(matrix_size, i)
-        counter += calculate_A((matrix, first_target_size, second_target_size, found))
+        vector = integer_to_binary(matrix_size, i)
+        counter += calculate_A((vector, first_target_size, second_target_size, found))
 
     return counter
 
 def calculate_A(args):
-    matrix, first_target_size, second_target_size, found = args
-    C1 = circulant(matrix)
+    vector, first_target_size, second_target_size, found = args
+    C1 = circulant(vector)
     C1 = np.triu(C1) + np.triu(C1, 1).T
     
     ret = set_indices(C1, first_target_size, 2)
@@ -67,10 +67,10 @@ def calculate_A(args):
         ret2 = set_indices(C1, second_target_size, 0)
         if ret2 == 0:
             print('found!')
-            decimal_value = int(''.join(map(str, matrix)), 2)
+            decimal_value = int(''.join(map(str, vector)), 2)
             save_matrix_to_txt(C1, f'generatedMatrix/circulantBlock/C1_{decimal_value}.txt')
             print(decimal_value)
-            print(matrix)
+            print(vector)
             found.value = True
     return 1
 
