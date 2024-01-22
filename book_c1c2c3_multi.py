@@ -66,18 +66,10 @@ def calculate_A(args):
             if ret == 0:
                 ret2 = set_indices(A, second_target_size, 0)
                 if ret2 == 0:
-                    print('found!')
-                    decimal_value = int(''.join(map(str, np.concatenate([vector, vector2, vector3] , 0))), 2)
-                    save_matrix_to_txt(A, f'generatedMatrix/circulantBlock/C1C2C3_{decimal_value}.txt')
-                    print(decimal_value)
-                    print(vector)
-                    print(vector2)
-                    print(vector3)
-                    found.value = True
-                    break
-        if ret == 0:
-            break
-    return 1
+                    decimal_value = int(''.join(map(str, np.concatenate([vector, vector2, vector3], 0))), 2)
+                    return A, vector, vector2, vector3, decimal_value
+
+    return None
 
 def main():
     manager = Manager()
@@ -85,15 +77,25 @@ def main():
 
     first_target_size = int(input("first_target_book: "))
     second_target_size = int(input("second_target_book: "))
-    matrix_size = 18
+    matrix_size = int(input("matrix_size: "))
 
     print('Max', (2 ** (matrix_size // 2 - 1))**3)
 
-    # Create a Pool of workers
+    chunk_size = cpu_count()
+    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size, found) for matrix_index in range(2 ** (matrix_size // 2 - 1))]
+
     with Pool() as pool:
-        args_list = [(matrix_size, matrix_index, first_target_size, second_target_size, found) for matrix_index in range(2 ** (matrix_size // 2 - 1))]
-        for _ in tqdm(pool.imap_unordered(calculate_A, args_list), total=2 ** (matrix_size // 2 - 1), desc="Finding satisfying graph"):
-            pass  # Counter is not needed
+        for result in tqdm(pool.imap_unordered(calculate_A, args_list, chunksize=chunk_size), total=len(args_list), desc="Finding satisfying graph", position=0, leave=True):
+            if result is not None:
+                A, vector, vector2, vector3, decimal_value = result
+                print('found!')
+                save_matrix_to_txt(A, f'generatedMatrix/circulantBlock/C1C2C3_{decimal_value}.txt')
+                print(decimal_value)
+                print(vector)
+                print(vector2)
+                print(vector3)
+                found.value = True
+                break
 
     if not found.value:
         print('not found')
