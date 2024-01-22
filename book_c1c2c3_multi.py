@@ -1,44 +1,8 @@
-from multiprocessing import Pool, cpu_count
-from functools import partial
+from multiprocessing import Pool, cpu_count, Manager
 from tqdm import tqdm
 import numpy as np
 from scipy.linalg import circulant
 from numba import jit
-
-@jit(nopython=True)
-def generate_combinations(elements, size):
-    result = np.empty((0, size), dtype=np.int64)
-    current = np.zeros(size, dtype=np.int64)
-    index = 0
-    start = 0
-
-    while index >= 0:
-        if index == size:
-            result = np.concatenate((result, current.reshape(1, -1)))
-            index -= 1
-        else:
-            for i in range(start, len(elements)):
-                current[index] = elements[i]
-                index += 1
-                start = i + 1
-                break
-            else:
-                index -= 1
-                if index >= 0:
-                    start = current[index] + 1
-
-    return result
-
-@jit(nopython=True)
-def numba_ix(matrix, rows, cols):
-    one_d_index = np.zeros(len(rows) * len(cols), dtype=np.int32)
-    for i, r in enumerate(rows):
-        start = i * len(cols)
-        one_d_index[start: start + len(cols)] = cols + matrix.shape[1] * r
-
-    arr_1d = matrix.reshape((matrix.shape[0] * matrix.shape[1], 1))
-    slice_1d = np.take(arr_1d, one_d_index)
-    return slice_1d.reshape((len(rows), len(cols)))
 
 @jit(nopython=True)
 def set_indices(target_matrix, target_size, condition):
@@ -51,7 +15,7 @@ def set_indices(target_matrix, target_size, condition):
 
             row_1 = target_matrix[spine_indices[0], :]
             row_2 = target_matrix[spine_indices[1], :]
-            
+
             if condition == 2 and (target_matrix[i, j] == 1):
                 common_vertices = np.where((row_1 == 1) & (row_2 == 1))[0]
                 if len(common_vertices) < target_size:
@@ -82,9 +46,8 @@ def integer_to_binary(cir_size):
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
-
 def calculate_A(args):
-    matrix_list, matrix, first_target_size, second_target_size = args
+    matrix_list, matrix, first_target_size, second_target_size, found = args
     counter = 0
     C1 = circulant(matrix)
     C1 = np.triu(C1) + np.triu(C1, 1).T
@@ -98,41 +61,42 @@ def calculate_A(args):
             B2 = np.hstack((C2.T, C3))
             A = np.vstack((B1, B2))
             counter += 1
-                
+
             ret = set_indices(A, first_target_size, 2)
             if ret == 0:
                 ret2 = set_indices(A, second_target_size, 0)
                 if ret2 == 0:
                     print('found!')
-                    print(ret)
-                    print(A)
-                    save_matrix_to_txt(A, f'generatedMatrix/circulantBlock/circulantBlock_{counter}.txt')
+                    decimal_value = int(''.join(map(str, matrix)), 2)
+                    save_matrix_to_txt(A, f'generatedMatrix/circulantBlock/C1C2C3_{decimal_value}.txt')
+                    print(decimal_value)
                     print(matrix)
                     print(matrix2)
                     print(matrix3)
+                    found.value = True
                     break
         if ret == 0:
-                break
-    return counter
+            break
+    return 1
 
 def main():
+    manager = Manager()
+    found = manager.Value('b', False)  # 'b' stands for boolean
+
     first_target_size = int(input("first_target_book: "))
     second_target_size = int(input("second_target_book: "))
     matrix_size = 14
-    
+
     matrix_list = integer_to_binary(int(matrix_size/2))
     print('Max', len(matrix_list)**3)
-    
-    counter = 0
-    
+
     # Create a Pool of workers
     with Pool() as pool:
-        args_list = [(matrix_list, matrix, first_target_size, second_target_size) for matrix in matrix_list]
-        for result in tqdm(pool.imap_unordered(calculate_A, args_list), total=len(matrix_list), desc="Finding satisfying graph"):
-            counter += result
+        args_list = [(matrix_list, matrix, first_target_size, second_target_size, found) for matrix in matrix_list]
+        for _ in tqdm(pool.imap_unordered(calculate_A, args_list), total=len(matrix_list), desc="Finding satisfying graph"):
+            pass  # Counter is not needed
 
-    print(counter)
-    if counter == len(matrix_list)**3:
+    if not found.value:
         print('not found')
 
 if __name__ == "__main__":
