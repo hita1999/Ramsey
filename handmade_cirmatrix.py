@@ -17,9 +17,18 @@ def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
 # 例
-vector1 = np.array([0, 0, 1,1,0])
-vector2 = np.array([0, 0,1,1,0])
-vector3 = np.array([0,1, 0,0,1])
+v1 = input("v1: ")
+v2 = input("v2: ")
+v3 = input("v3: ")
+
+vector1 = np.fromstring(v1, dtype=int, sep=' ')
+vector2 = np.fromstring(v2, dtype=int, sep=' ')
+vector3 = np.fromstring(v3, dtype=int, sep=' ')
+
+
+# #vector1 = np.array([0, 0, 0, 1, 1, 0, 0])
+# vector2 = np.array()
+# vector3 = np.array([0,1, 0,0,1])
 
 # for i in range(2**3):
 C1 = circulant_matrix(len(vector1), vector1)
