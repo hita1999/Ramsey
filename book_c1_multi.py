@@ -68,7 +68,7 @@ def calculate_A(args):
         if ret2 == 0:
             print('found!')
             decimal_value = int(''.join(map(str, matrix)), 2)
-            save_matrix_to_txt(C1, f'generatedMatrix/circulantBlock/circulantBlock_{decimal_value}.txt')
+            save_matrix_to_txt(C1, f'generatedMatrix/circulantBlock/C1_{decimal_value}.txt')
             print(decimal_value)
             print(matrix)
             found.value = True
@@ -80,7 +80,7 @@ def main():
         
         first_target_size = int(input("first_target_book: "))
         second_target_size = int(input("second_target_book: "))
-        matrix_size = 21
+        matrix_size = int(input("matrix_size: "))
         chunk_size = cpu_count()
         
         matrix_list = integer_to_binary(int(matrix_size))
