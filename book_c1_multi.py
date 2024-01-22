@@ -16,7 +16,7 @@ def set_indices(target_matrix, target_size, condition):
 
             row_1 = target_matrix[spine_indices[0], :]
             row_2 = target_matrix[spine_indices[1], :]
-            
+
             if condition == 2 and (target_matrix[i, j] == 1):
                 common_vertices = np.where((row_1 == 1) & (row_2 == 1))[0]
                 if len(common_vertices) < target_size:
@@ -35,24 +35,25 @@ def set_indices(target_matrix, target_size, condition):
     return ret
 
 @jit(nopython=True)
-def integer_to_binary(cir_size):
-    binary_list = []
-    for i in range(2 ** (cir_size-1)):
-        binary_array = np.zeros(cir_size, dtype=np.uint8)
-        for j in range(cir_size-1, -1, -1):
-            binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
-        binary_list.append(binary_array)
-    return binary_list
+def integer_to_binary(cir_size, binary_index):
+    binary_array = np.zeros(cir_size, dtype=np.uint8)
+    for j in range(cir_size-1, -1, -1):
+        binary_array[cir_size - 1 - j] = np.right_shift(binary_index, j) & 1
+    return binary_array
 
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
 
 def calculate_A_batch(args):
-    matrices, first_target_size, second_target_size, found = args
+    binary_index, matrix_size, first_target_size, second_target_size, found = args
+    chunk_size = cpu_count() * 2
     counter = 0
 
-    for matrix in matrices:
+    for i in range(binary_index, binary_index + chunk_size):
+        if i >= 2**(matrix_size-1):
+            break
+        matrix = integer_to_binary(matrix_size, i)
         counter += calculate_A((matrix, first_target_size, second_target_size, found))
 
     return counter
@@ -77,17 +78,13 @@ def calculate_A(args):
 def main():
     with Manager() as manager:
         found = manager.Value('b', False)
-        
+
         first_target_size = int(input("first_target_book: "))
         second_target_size = int(input("second_target_book: "))
         matrix_size = int(input("matrix_size: "))
-        chunk_size = cpu_count()
-        
-        matrix_list = integer_to_binary(int(matrix_size))
-        print('Max', len(matrix_list))
         
         with Pool() as pool:
-            args_list = [(matrix_list[i:i + chunk_size], first_target_size, second_target_size, found) for i in range(0, len(matrix_list), chunk_size)]
+            args_list = [(i, matrix_size, first_target_size, second_target_size, found) for i in range(0, 2**(matrix_size-1), cpu_count())]
             for _ in tqdm(pool.imap_unordered(calculate_A_batch, args_list), total=len(args_list), desc="Finding satisfying graph"):
                 pass
 
