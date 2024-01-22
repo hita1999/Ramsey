@@ -1,4 +1,5 @@
-from multiprocessing import Pool
+from multiprocessing import Pool, Manager
+from os import cpu_count
 from tqdm import tqdm
 import numpy as np
 from scipy.linalg import circulant
@@ -47,43 +48,51 @@ def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
 
-def calculate_A(args):
-    matrix_list, matrix, first_target_size, second_target_size = args
+def calculate_A_batch(args):
+    matrices, first_target_size, second_target_size, found = args
     counter = 0
+
+    for matrix in matrices:
+        counter += calculate_A((matrix, first_target_size, second_target_size, found))
+
+    return counter
+
+def calculate_A(args):
+    matrix, first_target_size, second_target_size, found = args
     C1 = circulant(matrix)
     C1 = np.triu(C1) + np.triu(C1, 1).T
-    counter += 1
     
     ret = set_indices(C1, first_target_size, 2)
     if ret == 0:
         ret2 = set_indices(C1, second_target_size, 0)
         if ret2 == 0:
             print('found!')
-            print(ret)
-            print(C1)
-            save_matrix_to_txt(C1, f'generatedMatrix/circulantBlock/circulantBlock_{counter}.txt')
+            decimal_value = int(''.join(map(str, matrix)), 2)
+            save_matrix_to_txt(C1, f'generatedMatrix/circulantBlock/circulantBlock_{decimal_value}.txt')
+            print(decimal_value)
             print(matrix)
-    return counter
+            found.value = True
+    return 1
 
 def main():
-    first_target_size = int(input("first_target_book: "))
-    second_target_size = int(input("second_target_book: "))
-    matrix_size = 14
-    
-    matrix_list = integer_to_binary(int(matrix_size))
-    print('Max', len(matrix_list))
-    
-    counter = 0
-    
-    # Create a Pool of workers
-    with Pool() as pool:
-        args_list = [(matrix_list, matrix, first_target_size, second_target_size) for matrix in matrix_list]
-        for result in tqdm(pool.imap_unordered(calculate_A, args_list), total=len(matrix_list), desc="Finding satisfying graph"):
-            counter += result
+    with Manager() as manager:
+        found = manager.Value('b', False)
+        
+        first_target_size = int(input("first_target_book: "))
+        second_target_size = int(input("second_target_book: "))
+        matrix_size = 21
+        chunk_size = cpu_count()
+        
+        matrix_list = integer_to_binary(int(matrix_size))
+        print('Max', len(matrix_list))
+        
+        with Pool() as pool:
+            args_list = [(matrix_list[i:i + chunk_size], first_target_size, second_target_size, found) for i in range(0, len(matrix_list), chunk_size)]
+            for _ in tqdm(pool.imap_unordered(calculate_A_batch, args_list), total=len(args_list), desc="Finding satisfying graph"):
+                pass
 
-    print(counter)
-    if counter == len(matrix_list):
-        print('not found')
+        if not found.value:
+            print('not found')
 
 if __name__ == "__main__":
     main()
