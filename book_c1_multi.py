@@ -46,11 +46,10 @@ def save_matrix_to_txt(matrix, file_path):
 
 
 def calculate_A_batch(args):
-    binary_index, matrix_size, first_target_size, second_target_size, found = args
-    chunk_size = cpu_count() * 2
+    start, end, matrix_size, first_target_size, second_target_size, found = args
     counter = 0
 
-    for i in range(binary_index, binary_index + chunk_size):
+    for i in range(start, end):
         if i >= 2**(matrix_size-1):
             break
         matrix = integer_to_binary(matrix_size, i)
@@ -82,10 +81,12 @@ def main():
         first_target_size = int(input("first_target_book: "))
         second_target_size = int(input("second_target_book: "))
         matrix_size = int(input("matrix_size: "))
+        chunk_size = cpu_count() * 16
+
+        ranges = [(i, i + chunk_size, matrix_size, first_target_size, second_target_size, found) for i in range(0, 2**(matrix_size-1), chunk_size)]
         
         with Pool() as pool:
-            args_list = [(i, matrix_size, first_target_size, second_target_size, found) for i in range(0, 2**(matrix_size-1), cpu_count())]
-            for _ in tqdm(pool.imap_unordered(calculate_A_batch, args_list), total=len(args_list), desc="Finding satisfying graph"):
+            for _ in tqdm(pool.imap_unordered(calculate_A_batch, ranges), total=len(ranges), desc="Finding satisfying graph"):
                 pass
 
         if not found.value:
