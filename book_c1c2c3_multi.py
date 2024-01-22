@@ -67,7 +67,7 @@ def calculate_A(args):
                 ret2 = set_indices(A, second_target_size, 0)
                 if ret2 == 0:
                     print('found!')
-                    decimal_value = int(''.join(map(str, vector)), 2)
+                    decimal_value = int(''.join(map(str, np.concatenate([vector, vector2, vector3] , 0))), 2)
                     save_matrix_to_txt(A, f'generatedMatrix/circulantBlock/C1C2C3_{decimal_value}.txt')
                     print(decimal_value)
                     print(vector)
