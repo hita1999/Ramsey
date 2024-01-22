@@ -82,7 +82,7 @@ def main():
             counter += result
 
     print(counter)
-    if counter == len(matrix_list)**3:
+    if counter == len(matrix_list):
         print('not found')
 
 if __name__ == "__main__":
