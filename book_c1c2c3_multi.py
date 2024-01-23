@@ -81,11 +81,10 @@ def main():
 
     print('Max', (2 ** (matrix_size // 2 - 1))**3)
 
-    chunk_size = cpu_count()
     args_list = [(matrix_size, matrix_index, first_target_size, second_target_size, found) for matrix_index in range(2 ** (matrix_size // 2 - 1))]
 
     with Pool() as pool:
-        for result in tqdm(pool.imap_unordered(calculate_A, args_list, chunksize=chunk_size), total=len(args_list), desc="Finding satisfying graph", position=0, leave=True):
+        for result in tqdm(pool.imap_unordered(calculate_A, args_list), total=len(args_list), desc="Finding satisfying graph", position=0, leave=True):
             if result is not None:
                 A, vector, vector2, vector3, decimal_value = result
                 print('found!')
