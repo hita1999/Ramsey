@@ -81,7 +81,7 @@ def calculate_A(args):
                         if ret == 0:
                             ret2 = set_indices(A, second_target_size, 0)
                             if ret2 == 0:
-                                decimal_value = int(''.join(map(str, np.concatenate([vector, vector2, vector3], 0))), 2)
+                                decimal_value = int(''.join(map(str, np.concatenate([vector, vector2, vector3, vector4, vector5, vector6], 0))), 2)
                                 return A, vector, vector2, vector3, vector4, vector5, vector6, decimal_value
 
     return None
