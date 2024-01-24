@@ -1,7 +1,6 @@
 from multiprocessing import Pool, cpu_count, Manager
 from tqdm import tqdm
 import numpy as np
-from scipy.linalg import circulant
 from numba import jit
 import cProfile
 import pstats
@@ -42,6 +41,29 @@ def integer_to_binary(cir_size, i):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
     return binary_array
 
+@jit(nopython=True)
+def triu_numba(matrix, k=0):
+    m, n = matrix.shape
+    result = np.zeros_like(matrix, dtype=np.int8)
+
+    for i in range(m):
+        for j in range(max(i - k, 0), n):
+            result[i, j] = matrix[i, j]
+
+    return result
+
+@jit(nopython=True)
+def circulant_numba(c):
+    c = np.asarray(c).ravel()
+    L = len(c)
+    result = np.zeros((L, L), dtype=c.dtype)
+
+    for i in range(L):
+        for j in range(L):
+            result[i, j] = c[(i - j) % L]
+
+    return result
+
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
@@ -50,7 +72,7 @@ def calculate_A_and_profile(args):
     matrix_size, matrix_index, first_target_size, second_target_size, found = args
     if matrix_index == 0:
         # プロファイリング用のファイル名
-        profile_filename = f"res_profile/profile_results_{matrix_index}.txt"
+        profile_filename = f"res_profile/profile_results_B2B5_0.txt"
 
         # プロファイリングを開始
         profile = cProfile.Profile()
@@ -75,38 +97,51 @@ def calculate_A(args):
     matrix_size, matrix_index, first_target_size, second_target_size, found = args
     counter = 0
     vector = integer_to_binary(matrix_size // 3, matrix_index)
-    C1 = circulant(vector)
-    C1 = np.triu(C1) + np.triu(C1, 1).T
-    
+    C1 = circulant_numba(vector)
+    triu_C1 = triu_numba(C1)
     
     for matrix2_index in range(2 ** (matrix_size // 3 - 1)):
         vector2 = integer_to_binary(matrix_size // 3, matrix2_index)
-        C2 = circulant(vector2)
-        C2 = np.triu(C2) + np.triu(C2, 1).T
+        C2 = circulant_numba(vector2)
+        triu_C2 = triu_numba(C2)
         
         for matrix3_index in range(2 ** (matrix_size // 3 - 1)):
             vector3 = integer_to_binary(matrix_size // 3, matrix3_index)
-            C3 = circulant(vector3)
-            C3 = np.triu(C3) + np.triu(C3, 1).T
+            C3 = circulant_numba(vector3)
+            triu_C3 = triu_numba(C3)
             
             for matrix4_index in range(2 ** (matrix_size // 3 - 1)):
                 vector4 = integer_to_binary(matrix_size // 3, matrix4_index)
-                C4 = circulant(vector4)
-                C4 = np.triu(C4) + np.triu(C4, 1).T
+                C4 = circulant_numba(vector4)
+                triu_C4 = triu_numba(C4)
 
                 for matrix5_index in range(2 ** (matrix_size // 3 - 1)):
                     vector5 = integer_to_binary(matrix_size // 3, matrix5_index)
-                    C5 = circulant(vector5)
-                    C5 = np.triu(C5) + np.triu(C5, 1).T
+                    C5 = circulant_numba(vector5)
+                    triu_C5 = triu_numba(C5)
 
                     for matrix6_index in range(2 ** (matrix_size // 3 - 1)):
                         vector6 = integer_to_binary(matrix_size // 3, matrix6_index)
-                        C6 = circulant(vector6)
-                        C6 = np.triu(C6) + np.triu(C6, 1).T
+                        C6 = circulant_numba(vector6)
+                        triu_C6 = triu_numba(C6)
 
-                        B1 = np.block([C1, C2, C3])
-                        B2 = np.block([C2.T, C4, C5])
-                        B3 = np.block([C3.T, C5.T, C6])
+                        # Pre-allocate memory for B1, B2, B3
+                        B1 = np.empty((C1.shape[0], triu_C1.shape[1] + triu_C2.shape[1] + triu_C3.shape[1]), dtype=triu_C1.dtype)
+                        B2 = np.empty((C2.shape[0], triu_C2.shape[1] + triu_C4.shape[1] + triu_C5.shape[1]), dtype=triu_C2.dtype)
+                        B3 = np.empty((C3.shape[0], triu_C3.shape[1] + triu_C5.shape[1] + triu_C6.shape[1]), dtype=triu_C3.dtype)
+
+                        # Fill in the values
+                        B1[:, :triu_C1.shape[1]] = triu_C1
+                        B1[:, triu_C1.shape[1]:triu_C1.shape[1] + triu_C2.shape[1]] = triu_C2
+                        B1[:, triu_C1.shape[1] + triu_C2.shape[1]:] = triu_C3
+
+                        B2[:, :triu_C2.shape[1]] = triu_C2
+                        B2[:, triu_C2.shape[1]:triu_C2.shape[1] + triu_C4.shape[1]] = triu_C4
+                        B2[:, triu_C2.shape[1] + triu_C4.shape[1]:] = triu_C5
+
+                        B3[:, :triu_C3.shape[1]] = triu_C3
+                        B3[:, triu_C3.shape[1]:triu_C3.shape[1] + triu_C5.shape[1]] = triu_C5
+                        B3[:, triu_C3.shape[1] + triu_C5.shape[1]:] = triu_C6
 
                         A = np.vstack((B1, B2, B3))
                         counter += 1
@@ -119,6 +154,7 @@ def calculate_A(args):
                                 return A, vector, vector2, vector3, vector4, vector5, vector6, decimal_value
             
     return None
+
 
 def main():
     manager = Manager()
