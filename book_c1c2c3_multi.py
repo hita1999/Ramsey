@@ -66,7 +66,7 @@ def calculate_A(args):
             if ret == 0:
                 ret2 = set_indices(A, second_target_size, 0)
                 if ret2 == 0:
-                    decimal_value = int(''.join(map(str, np.concatenate([vector, vector2, vector3], 0))), 2)
+                    decimal_value = sum(int(''.join(map(str, vec)), 2) * (2 ** (matrix_size // 2 - 1)) ** exp for vec, exp in zip([vector, vector2, vector3], [2, 1, 0]))
                     return A, vector, vector2, vector3, decimal_value
 
     return None
