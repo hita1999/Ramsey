@@ -41,29 +41,6 @@ def integer_to_binary(cir_size, binary_index):
         binary_array[cir_size - 1 - j] = np.right_shift(binary_index, j) & 1
     return binary_array
 
-@jit(nopython=True)
-def triu_numba(matrix, k=0):
-    m, n = matrix.shape
-    result = np.zeros_like(matrix, dtype=np.int8)
-
-    for i in range(m):
-        for j in range(max(i - k, 0), n):
-            result[i, j] = matrix[i, j]
-
-    return result
-
-@jit(nopython=True)
-def circulant_numba(c):
-    c = np.asarray(c).ravel()
-    L = len(c)
-    result = np.zeros((L, L), dtype=c.dtype)
-
-    for i in range(L):
-        for j in range(L):
-            result[i, j] = c[(i - j) % L]
-
-    return result
-
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
@@ -82,8 +59,8 @@ def calculate_A_batch(args):
 
 def calculate_A(args):
     vector, first_target_size, second_target_size, found = args
-    C1 = circulant_numba(vector)
-    C1 = triu_numba(C1) + triu_numba(C1, 1).T
+    C1 = circulant(vector)
+    C1 = np.triu(C1) + np.triu(C1, 1).T
     
     ret = set_indices(C1, first_target_size, 2)
     if ret == 0:
