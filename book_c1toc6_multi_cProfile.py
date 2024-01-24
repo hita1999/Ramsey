@@ -1,3 +1,4 @@
+from calendar import c
 from multiprocessing import Pool, cpu_count, Manager
 from tqdm import tqdm
 import numpy as np
@@ -5,7 +6,7 @@ from numba import jit
 import cProfile
 import pstats
 
-@jit(nopython=True)
+@jit(nopython=True, cache=True)
 def set_indices(target_matrix, target_size, condition):
     n = len(target_matrix)
     ret = -1
@@ -34,14 +35,14 @@ def set_indices(target_matrix, target_size, condition):
 
     return ret
 
-@jit(nopython=True)
+@jit(nopython=True, cache=True)
 def integer_to_binary(cir_size, i):
     binary_array = np.zeros(cir_size, dtype=np.uint8)
     for j in range(cir_size-1, -1, -1):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
     return binary_array
 
-@jit(nopython=True)
+@jit(nopython=True, cache=True)
 def triu_numba(matrix):
     m, n = matrix.shape
     result = np.zeros_like(matrix)
@@ -52,7 +53,7 @@ def triu_numba(matrix):
 
     return result
 
-@jit(nopython=True)
+@jit(nopython=True, cache=True)
 def circulant_numba(c):
     c = np.asarray(c).ravel()
     L = len(c)
@@ -64,6 +65,9 @@ def circulant_numba(c):
 
     return result
 
+@jit(nopython=True, cache=True)
+def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
+    A[row_start:row_end, col_start:col_end] = matrix
 
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
@@ -73,7 +77,7 @@ def calculate_A_and_profile(args):
     matrix_size, matrix_index, first_target_size, second_target_size, found = args
     if matrix_index == 0:
         # プロファイリング用のファイル名
-        profile_filename = f"res_profile/profile_results_B2B5_7.txt"
+        profile_filename = f"res_profile/B2B5/profile_results_B2B5_8.txt"
 
         # プロファイリングを開始
         profile = cProfile.Profile()
@@ -94,51 +98,62 @@ def calculate_A_and_profile(args):
         calculate_A(args)
     return matrix_index
 
+
 def calculate_A(args):
     matrix_size, matrix_index, first_target_size, second_target_size, found = args
     
     A = np.zeros((matrix_size, matrix_size), dtype=np.uint8)
-    B1 = np.zeros((matrix_size//3, matrix_size), dtype=np.uint8)
-    B2 = np.zeros((matrix_size//3, matrix_size), dtype=np.uint8)
-    B3 = np.zeros((matrix_size//3, matrix_size), dtype=np.uint8)
     
     
     counter = 0
     vector = integer_to_binary(matrix_size // 3, matrix_index)
     C1 = circulant_numba(vector)
     C1 = triu_numba(C1) + triu_numba(C1).T
+
+    assign_matrix_to_A(A, C1, 0, matrix_size//3, 0, matrix_size//3)
     
     
     for matrix2_index in range(2 ** (matrix_size // 3 - 1)):
         vector2 = integer_to_binary(matrix_size // 3, matrix2_index)
         C2 = circulant_numba(vector2)
         C2 = triu_numba(C2) + triu_numba(C2).T
+
+        assign_matrix_to_A(A, C2, 0, matrix_size//3, matrix_size//3, 2*matrix_size//3)
+        assign_matrix_to_A(A, C2.T, matrix_size//3, 2*matrix_size//3, 0, matrix_size//3)
+
+
         
         for matrix3_index in range(2 ** (matrix_size // 3 - 1)):
             vector3 = integer_to_binary(matrix_size // 3, matrix3_index)
             C3 = circulant_numba(vector3)
             C3 = triu_numba(C3) + triu_numba(C3).T
+
+
+            assign_matrix_to_A(A, C3, 0, matrix_size//3, 2*matrix_size//3, matrix_size)
+            assign_matrix_to_A(A, C3.T, 2*matrix_size//3, matrix_size, 0, matrix_size//3)
             
             for matrix4_index in range(2 ** (matrix_size // 3 - 1)):
                 vector4 = integer_to_binary(matrix_size // 3, matrix4_index)
                 C4 = circulant_numba(vector4)
                 C4 = triu_numba(C4) + triu_numba(C4).T
+
+                assign_matrix_to_A(A, C4, matrix_size//3, 2*matrix_size//3, matrix_size//3, 2*matrix_size//3)
                 
                 for matrix5_index in range(2 ** (matrix_size // 3 - 1)):
                     vector5 = integer_to_binary(matrix_size // 3, matrix5_index)
                     C5 = circulant_numba(vector5)
                     C5 = triu_numba(C5) + triu_numba(C5).T
+
+
+                    assign_matrix_to_A(A, C5, matrix_size//3, 2*matrix_size//3, 2*matrix_size//3, matrix_size)
+                    assign_matrix_to_A(A, C5.T, 2*matrix_size//3, matrix_size, matrix_size//3, 2*matrix_size//3)
                     
                     for matrix6_index in range(2 ** (matrix_size // 3 - 1)):
                         vector6 = integer_to_binary(matrix_size // 3, matrix6_index)
                         C6 = circulant_numba(vector6)
                         C6 = triu_numba(C6) + triu_numba(C6).T
-                        
-                        B1 = np.concatenate([C1, C2, C3], axis=1)
-                        B2 = np.concatenate([C2.T, C4, C5], axis=1)
-                        B3 = np.concatenate([C3.T, C5.T, C6], axis=1)
-                        
-                        A = np.concatenate((B1, B2, B3), axis=0)
+
+                        assign_matrix_to_A(A, C6, 2*matrix_size//3, matrix_size, 2*matrix_size//3, matrix_size)
                         counter += 1
 
                         ret = set_indices(A, first_target_size, 2)
@@ -166,21 +181,20 @@ def main():
     args_list = [(matrix_size, matrix_index, first_target_size, second_target_size, found) for matrix_index in range(2 ** (matrix_size // 3 - 1))]
 
     with Pool() as pool:
-        # 各プロセスでプロファイリングを実行し、結果を取得
         results = list(pool.imap_unordered(calculate_A_and_profile, args_list))
         
     print('done')
 
 if __name__ == "__main__":
-    profile = cProfile.Profile()
-    profile.enable()
+    # profile = cProfile.Profile()
+    # profile.enable()
 
     main()
 
-    profile.disable()
+    # profile.disable()
 
-    # メインプロセスのプロファイリング結果を保存
-    with open("res_profile/main_profile_results.txt", "w") as f:
-        stats = pstats.Stats(profile, stream=f)
-        stats.sort_stats("tottime")
-        stats.print_stats()
+    # # メインプロセスのプロファイリング結果を保存
+    # with open("res_profile/main_profile_results.txt", "w") as f:
+    #     stats = pstats.Stats(profile, stream=f)
+    #     stats.sort_stats("tottime")
+    #     stats.print_stats()
