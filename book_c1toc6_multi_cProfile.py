@@ -77,7 +77,7 @@ def calculate_A_and_profile(args):
     matrix_size, matrix_index, first_target_size, second_target_size, found = args
     if matrix_index == 0:
         # プロファイリング用のファイル名
-        profile_filename = f"res_profile/B2B5/profile_results_B2B5_8.txt"
+        profile_filename = f"res_profile/profile_results_B3B6_1.txt"
 
         # プロファイリングを開始
         profile = cProfile.Profile()
