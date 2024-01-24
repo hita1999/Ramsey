@@ -1,10 +1,10 @@
+import cProfile
 from multiprocessing import Pool, cpu_count, Manager
+import pstats
 from tqdm import tqdm
 import numpy as np
-from numba import jit
-import cProfile
-import pstats
 from scipy.linalg import circulant
+from numba import jit
 
 @jit(nopython=True)
 def set_indices(target_matrix, target_size, condition):
@@ -42,7 +42,6 @@ def integer_to_binary(cir_size, i):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
     return binary_array
 
-
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
@@ -75,43 +74,30 @@ def calculate_A_and_profile(args):
 def calculate_A(args):
     matrix_size, matrix_index, first_target_size, second_target_size, found = args
     counter = 0
-    vector = integer_to_binary(matrix_size // 3, matrix_index)
+    vector = integer_to_binary(matrix_size // 2, matrix_index)
     C1 = circulant(vector)
     C1 = np.triu(C1) + np.triu(C1, 1).T
-    for matrix2_index in range(2 ** (matrix_size // 3 - 1)):
-        vector2 = integer_to_binary(matrix_size // 3, matrix2_index)
+    for matrix2_index in range(2 ** (matrix_size // 2 - 1)):
+        vector2 = integer_to_binary(matrix_size // 2, matrix2_index)
         C2 = circulant(vector2)
         C2 = np.triu(C2) + np.triu(C2, 1).T
-        for matrix3_index in range(2 ** (matrix_size // 3 - 1)):
-            vector3 = integer_to_binary(matrix_size // 3, matrix3_index)
+        for matrix3_index in range(2 ** (matrix_size // 2 - 1)):
+            vector3 = integer_to_binary(matrix_size // 2, matrix3_index)
             C3 = circulant(vector3)
             C3 = np.triu(C3) + np.triu(C3, 1).T
-            for matrix4_index in range(2 ** (matrix_size // 3 - 1)):
-                vector4 = integer_to_binary(matrix_size // 3, matrix4_index)
-                C4 = circulant(vector4)
-                C4 = np.triu(C4) + np.triu(C4, 1).T
-                for matrix5_index in range(2 ** (matrix_size // 3 - 1)):
-                    vector5 = integer_to_binary(matrix_size // 3, matrix5_index)
-                    C5 = circulant(vector5)
-                    C5 = np.triu(C5) + np.triu(C5, 1).T
-                    for matrix6_index in range(2 ** (matrix_size // 3 - 1)):
-                        vector6 = integer_to_binary(matrix_size // 3, matrix6_index)
-                        C6 = circulant(vector6)
-                        C6 = np.triu(C6) + np.triu(C6, 1).T
-                        
-                        B1 = np.hstack((C1, C2, C3))
-                        B2 = np.hstack((C2.T, C4, C5))
-                        B3 = np.hstack((C3.T, C5.T, C6))
-                        
-                        A = np.vstack((B1, B2, B3))
-                        counter += 1
+            B1 = np.hstack((C1, C2))
+            B2 = np.hstack((C2.T, C3))
+            A = np.vstack((B1, B2))
+            counter += 1
 
-                        ret = set_indices(A, first_target_size, 2)
-                        if ret == 0:
-                            ret2 = set_indices(A, second_target_size, 0)
-                            if ret2 == 0:
-                                decimal_value = int(''.join(map(str, np.concatenate([vector, vector2, vector3, vector4, vector5, vector6], 0))), 2)
-                                return A, vector, vector2, vector3, vector4, vector5, vector6, decimal_value
+            ret = set_indices(A, first_target_size, 2)
+            if ret == 0:
+                ret2 = set_indices(A, second_target_size, 0)
+                if ret2 == 0:
+                    decimal_value = int(''.join(map(str, np.concatenate([vector, vector2, vector3], 0))), 2)
+                    print('found!')
+                    print(decimal_value)
+                    return A, vector, vector2, vector3, decimal_value
 
     return None
 
@@ -123,28 +109,16 @@ def main():
     second_target_size = int(input("second_target_book: "))
     matrix_size = int(input("matrix_size: "))
 
-    print('Max', (2 ** (matrix_size // 3 - 1))**6)
+    print('Max', (2 ** (matrix_size // 2 - 1))**3)
 
-    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size, found) for matrix_index in range(2 ** (matrix_size // 3 - 1))]
+    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size, found) for matrix_index in range(2 ** (matrix_size // 2 - 1))]
 
     with Pool() as pool:
         # 各プロセスでプロファイリングを実行し、結果を取得
         results = list(pool.imap_unordered(calculate_A_and_profile, args_list))
 
-
     if not found.value:
         print('not found')
 
 if __name__ == "__main__":
-    profile = cProfile.Profile()
-    profile.enable()
-
     main()
-
-    profile.disable()
-
-    # メインプロセスのプロファイリング結果を保存
-    with open("res_profile/main_profile_results.txt", "w") as f:
-        stats = pstats.Stats(profile, stream=f)
-        stats.sort_stats("tottime")
-        stats.print_stats()
