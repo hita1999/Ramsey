@@ -73,7 +73,7 @@ def calculate_A_and_profile(args):
     matrix_size, matrix_index, first_target_size, second_target_size, found = args
     if matrix_index == 0:
         # プロファイリング用のファイル名
-        profile_filename = f"res_profile/profile_results_B2B5_4.txt"
+        profile_filename = f"res_profile/profile_results_B2B5_7.txt"
 
         # プロファイリングを開始
         profile = cProfile.Profile()
@@ -96,6 +96,13 @@ def calculate_A_and_profile(args):
 
 def calculate_A(args):
     matrix_size, matrix_index, first_target_size, second_target_size, found = args
+    
+    A = np.zeros((matrix_size, matrix_size), dtype=np.uint8)
+    B1 = np.zeros((matrix_size//3, matrix_size), dtype=np.uint8)
+    B2 = np.zeros((matrix_size//3, matrix_size), dtype=np.uint8)
+    B3 = np.zeros((matrix_size//3, matrix_size), dtype=np.uint8)
+    
+    
     counter = 0
     vector = integer_to_binary(matrix_size // 3, matrix_index)
     C1 = circulant_numba(vector)
