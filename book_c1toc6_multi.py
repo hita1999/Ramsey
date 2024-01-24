@@ -1,7 +1,7 @@
+import datetime
 from multiprocessing import Pool, cpu_count, Manager
 from tqdm import tqdm
 import numpy as np
-from scipy.linalg import circulant
 from numba import jit
 
 @jit(nopython=True)
@@ -154,4 +154,5 @@ def main():
         print('not found')
 
 if __name__ == "__main__":
+    print(datetime.datetime.now().time())
     main()
