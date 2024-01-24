@@ -72,7 +72,7 @@ def calculate_A_and_profile(args):
     matrix_size, matrix_index, first_target_size, second_target_size, found = args
     if matrix_index == 0:
         # プロファイリング用のファイル名
-        profile_filename = f"res_profile/profile_results_B2B5_0.txt"
+        profile_filename = f"res_profile/profile_results_7.txt"
 
         # プロファイリングを開始
         profile = cProfile.Profile()
@@ -99,17 +99,21 @@ def calculate_A(args):
     vector = integer_to_binary(matrix_size // 3, matrix_index)
     C1 = circulant_numba(vector)
     triu_C1 = triu_numba(C1)
-    
+
+    A_rows = triu_C1.shape[0] * 3
+    A_cols = triu_C1.shape[1] + triu_C1.shape[1] * 2  # Adjusted for three blocks B1, B2, B3
+    A = np.empty((A_rows, A_cols), dtype=triu_C1.dtype)
+
     for matrix2_index in range(2 ** (matrix_size // 3 - 1)):
         vector2 = integer_to_binary(matrix_size // 3, matrix2_index)
         C2 = circulant_numba(vector2)
         triu_C2 = triu_numba(C2)
-        
+
         for matrix3_index in range(2 ** (matrix_size // 3 - 1)):
             vector3 = integer_to_binary(matrix_size // 3, matrix3_index)
             C3 = circulant_numba(vector3)
             triu_C3 = triu_numba(C3)
-            
+
             for matrix4_index in range(2 ** (matrix_size // 3 - 1)):
                 vector4 = integer_to_binary(matrix_size // 3, matrix4_index)
                 C4 = circulant_numba(vector4)
@@ -125,25 +129,17 @@ def calculate_A(args):
                         C6 = circulant_numba(vector6)
                         triu_C6 = triu_numba(C6)
 
-                        # Pre-allocate memory for B1, B2, B3
-                        B1 = np.empty((C1.shape[0], triu_C1.shape[1] + triu_C2.shape[1] + triu_C3.shape[1]), dtype=triu_C1.dtype)
-                        B2 = np.empty((C2.shape[0], triu_C2.shape[1] + triu_C4.shape[1] + triu_C5.shape[1]), dtype=triu_C2.dtype)
-                        B3 = np.empty((C3.shape[0], triu_C3.shape[1] + triu_C5.shape[1] + triu_C6.shape[1]), dtype=triu_C3.dtype)
+                        # Use NumPy slicing for efficient assignment
+                        A[:triu_C1.shape[0], :triu_C1.shape[1]] = triu_C1
+                        A[triu_C1.shape[0]:2*triu_C1.shape[0], :triu_C2.shape[1]] = triu_C2
+                        A[2*triu_C1.shape[0]:, :triu_C3.shape[1]] = triu_C3
+                        A[:triu_C1.shape[0], triu_C1.shape[1]:triu_C1.shape[1] + triu_C2.shape[1]] = triu_C2
+                        A[triu_C1.shape[0]:2*triu_C1.shape[0], triu_C2.shape[1]:triu_C2.shape[1] + triu_C4.shape[1]] = triu_C4
+                        A[2*triu_C1.shape[0]:, triu_C3.shape[1]:triu_C3.shape[1] + triu_C5.shape[1]] = triu_C5
+                        A[:triu_C1.shape[0], triu_C1.shape[1] + triu_C2.shape[1]:] = triu_C3
+                        A[triu_C1.shape[0]:2*triu_C1.shape[0], triu_C2.shape[1] + triu_C4.shape[1]:] = triu_C5
+                        A[2*triu_C1.shape[0]:, triu_C3.shape[1] + triu_C5.shape[1]:] = triu_C6
 
-                        # Fill in the values
-                        B1[:, :triu_C1.shape[1]] = triu_C1
-                        B1[:, triu_C1.shape[1]:triu_C1.shape[1] + triu_C2.shape[1]] = triu_C2
-                        B1[:, triu_C1.shape[1] + triu_C2.shape[1]:] = triu_C3
-
-                        B2[:, :triu_C2.shape[1]] = triu_C2
-                        B2[:, triu_C2.shape[1]:triu_C2.shape[1] + triu_C4.shape[1]] = triu_C4
-                        B2[:, triu_C2.shape[1] + triu_C4.shape[1]:] = triu_C5
-
-                        B3[:, :triu_C3.shape[1]] = triu_C3
-                        B3[:, triu_C3.shape[1]:triu_C3.shape[1] + triu_C5.shape[1]] = triu_C5
-                        B3[:, triu_C3.shape[1] + triu_C5.shape[1]:] = triu_C6
-
-                        A = np.vstack((B1, B2, B3))
                         counter += 1
 
                         ret = set_indices(A, first_target_size, 2)
@@ -152,8 +148,9 @@ def calculate_A(args):
                             if ret2 == 0:
                                 decimal_value = int(''.join(map(str, np.concatenate([vector, vector2, vector3, vector4, vector5, vector6], 0))), 2)
                                 return A, vector, vector2, vector3, vector4, vector5, vector6, decimal_value
-            
+
     return None
+
 
 
 def main():
