@@ -1,0 +1,53 @@
+         150811655 function calls (140186085 primitive calls) in 116.862 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1   10.638   10.638  116.862  116.862 /Users/h.t/program/Ramsey/book_c1toc6_multi.py:73(calculate_A)
+18175317/7549747   20.140    0.000   73.421    0.000 {built-in method numpy.core._multiarray_umath.implement_array_function}
+  2236962    1.535    0.000   34.664    0.000 <__array_function__ internals>:177(triu)
+  3145728    2.201    0.000   34.604    0.000 <__array_function__ internals>:177(hstack)
+  2236962    4.566    0.000   31.576    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/lib/twodim_base.py:497(triu)
+  3145728    4.782    0.000   27.750    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/shape_base.py:299(hstack)
+  2236962    4.279    0.000   20.513    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/lib/twodim_base.py:376(tri)
+  1118481    4.069    0.000   16.977    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/scipy/linalg/_special_matrices.py:221(circulant)
+  5312785    4.177    0.000   16.123    0.000 <__array_function__ internals>:177(concatenate)
+  3145728    1.974    0.000   12.307    0.000 <__array_function__ internals>:177(atleast_1d)
+  1048576    0.721    0.000   11.218    0.000 <__array_function__ internals>:177(vstack)
+  1048576    1.472    0.000    8.970    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/shape_base.py:223(vstack)
+  1118481    5.447    0.000    8.759    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/lib/stride_tricks.py:38(as_strided)
+  3145728    6.158    0.000    8.415    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/shape_base.py:23(atleast_1d)
+  1214814    6.933    0.000    6.933    0.000 /Users/h.t/program/Ramsey/book_c1toc6_multi.py:9(set_indices)
+  2236962    6.605    0.000    6.605    0.000 {method 'outer' of 'numpy.ufunc' objects}
+  4473924    3.524    0.000    6.331    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/lib/twodim_base.py:33(_min_int)
+  2236962    1.631    0.000    5.553    0.000 <__array_function__ internals>:177(where)
+  1048576    0.651    0.000    4.211    0.000 <__array_function__ internals>:177(atleast_2d)
+  4194304    1.704    0.000    3.944    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/shape_base.py:218(_vhstack_dispatcher)
+  1048576    2.211    0.000    2.914    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/shape_base.py:81(atleast_2d)
+  4473924    2.791    0.000    2.791    0.000 {built-in method numpy.arange}
+  2236962    2.456    0.000    2.456    0.000 {built-in method numpy.asarray}
+  4194304    1.392    0.000    2.240    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/shape_base.py:207(_arrays_for_stack_dispatcher)
+  1118481    1.272    0.000    1.828    0.000 /Users/h.t/program/Ramsey/book_c1toc6_multi.py:38(integer_to_binary)
+  4473924    1.523    0.000    1.523    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/getlimits.py:679(min)
+ 14819874    1.491    0.000    1.491    0.000 {built-in method numpy.asanyarray}
+  4473924    1.284    0.000    1.284    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/getlimits.py:692(max)
+ 12582912    1.215    0.000    1.215    0.000 {method 'append' of 'list' objects}
+  4194304    0.848    0.000    0.848    0.000 {built-in method builtins.hasattr}
+  1118481    0.792    0.000    0.792    0.000 {method 'copy' of 'numpy.ndarray' objects}
+  5312785    0.764    0.000    0.764    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/multiarray.py:152(concatenate)
+  2236962    0.707    0.000    0.707    0.000 {built-in method numpy.zeros}
+  5312785    0.661    0.000    0.661    0.000 {built-in method builtins.len}
+  1118481    0.556    0.000    0.556    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numba/core/serialize.py:30(_numba_unpickle)
+  4194304    0.512    0.000    0.512    0.000 {built-in method builtins.isinstance}
+  2236962    0.505    0.000    0.505    0.000 {method 'astype' of 'numpy.ndarray' objects}
+  2236962    0.412    0.000    0.412    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/multiarray.py:345(where)
+  1118481    0.405    0.000    0.405    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/lib/stride_tricks.py:25(_maybe_view_as_subclass)
+  3145728    0.404    0.000    0.404    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/shape_base.py:19(_atleast_1d_dispatcher)
+  1118481    0.357    0.000    0.357    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/lib/stride_tricks.py:20(__init__)
+  2236962    0.356    0.000    0.356    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/lib/twodim_base.py:438(_trilu_dispatcher)
+  1118481    0.333    0.000    0.333    0.000 {method 'ravel' of 'numpy.ndarray' objects}
+  1118481    0.264    0.000    0.264    0.000 {built-in method numpy.array}
+  1048576    0.146    0.000    0.146    0.000 /Users/h.t/.asdf/installs/python/3.11.1/lib/python3.11/site-packages/numpy/core/shape_base.py:77(_atleast_2d_dispatcher)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
