@@ -4,7 +4,7 @@ import numpy as np
 from scipy.linalg import circulant
 from numba import jit
 
-@jit(nopython=True)
+@jit(nopython=True, cache=True)
 def set_indices(target_matrix, target_size, condition):
     n = len(target_matrix)
     ret = -1
@@ -33,33 +33,72 @@ def set_indices(target_matrix, target_size, condition):
 
     return ret
 
-@jit(nopython=True)
+@jit(nopython=True, cache=True)
 def integer_to_binary(cir_size, i):
     binary_array = np.zeros(cir_size, dtype=np.uint8)
     for j in range(cir_size-1, -1, -1):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
     return binary_array
 
+@jit(nopython=True, cache=True)
+def triu_numba(matrix):
+    m, n = matrix.shape
+    result = np.zeros_like(matrix)
+
+    for i in range(m):
+        for j in range(i, n):
+            result[i, j] = matrix[i, j]
+
+    return result
+
+@jit(nopython=True, cache=True)
+def circulant_numba(c):
+    c = np.asarray(c).ravel()
+    L = len(c)
+    result = np.zeros((L, L), dtype=c.dtype)
+
+    for i in range(L):
+        for j in range(L):
+            result[i, j] = c[(i - j) % L]
+
+    return result
+
+@jit(nopython=True, cache=True)
+def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
+    A[row_start:row_end, col_start:col_end] = matrix
+
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
 def calculate_A(args):
     matrix_size, matrix_index, first_target_size, second_target_size, found = args
+
+    A = np.zeros((matrix_size, matrix_size), dtype=np.uint8)
+
     counter = 0
     vector = integer_to_binary(matrix_size // 2, matrix_index)
-    C1 = circulant(vector)
-    C1 = np.triu(C1) + np.triu(C1, 1).T
+    C1 = circulant_numba(vector)
+    C1 = triu_numba(C1) + triu_numba(C1).T
+
+    assign_matrix_to_A(A, C1, 0, matrix_size//2, 0, matrix_size//2)
+
     for matrix2_index in range(2 ** (matrix_size // 2 - 1)):
         vector2 = integer_to_binary(matrix_size // 2, matrix2_index)
-        C2 = circulant(vector2)
-        C2 = np.triu(C2) + np.triu(C2, 1).T
+
+        C2 = circulant_numba(vector2)
+        C2 = triu_numba(C2) + triu_numba(C2).T
+
+        assign_matrix_to_A(A, C2, 0, matrix_size//2, matrix_size//2, matrix_size)
+        assign_matrix_to_A(A, C2.T, matrix_size//2, matrix_size, 0, matrix_size//2)
+
         for matrix3_index in range(2 ** (matrix_size // 2 - 1)):
             vector3 = integer_to_binary(matrix_size // 2, matrix3_index)
-            C3 = circulant(vector3)
-            C3 = np.triu(C3) + np.triu(C3, 1).T
-            B1 = np.hstack((C1, C2))
-            B2 = np.hstack((C2.T, C3))
-            A = np.vstack((B1, B2))
+            C3 = circulant_numba(vector3)
+            C3 = triu_numba(C3) + triu_numba(C3).T
+
+
+            assign_matrix_to_A(A, C3, matrix_size//2, matrix_size, matrix_size//2, matrix_size)
+
             counter += 1
 
             ret = set_indices(A, first_target_size, 2)
