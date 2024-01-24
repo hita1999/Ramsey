@@ -49,9 +49,9 @@ def save_matrix_to_txt(matrix, file_path):
 
 def calculate_A_and_profile(args):
     matrix_size, matrix_index, first_target_size, second_target_size, found = args
-    if matrix_index == 4:
+    if matrix_index == 0:
         # プロファイリング用のファイル名
-        profile_filename = f"res_profile/profile_results_B1B2_0.txt"
+        profile_filename = f"res_profile/profile_results_B2B5_0.txt"
 
         # プロファイリングを開始
         profile = cProfile.Profile()
@@ -111,6 +111,8 @@ def calculate_A(args):
                             ret2 = set_indices(A, second_target_size, 0)
                             if ret2 == 0:
                                 decimal_value = int(''.join(map(str, np.concatenate([vector, vector2, vector3, vector4, vector5, vector6], 0))), 2)
+                                print('found!')
+                                print(decimal_value)
                                 return A, vector, vector2, vector3, vector4, vector5, vector6, decimal_value
 
     return None
@@ -130,10 +132,8 @@ def main():
     with Pool() as pool:
         # 各プロセスでプロファイリングを実行し、結果を取得
         results = list(pool.imap_unordered(calculate_A_and_profile, args_list))
-
-
-    if not found.value:
-        print('not found')
+        
+    print('done')
 
 if __name__ == "__main__":
     profile = cProfile.Profile()
