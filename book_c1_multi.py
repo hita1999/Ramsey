@@ -55,7 +55,8 @@ def calculate_A_batch(args):
         vector = integer_to_binary(matrix_size, i)
         counter += calculate_A((vector, first_target_size, second_target_size, found, result_list))
 
-    result_queue.put(result_list)
+    if found.value:
+        result_queue.put(result_list)
     return counter
 
 def calculate_A(args):
@@ -70,6 +71,8 @@ def calculate_A(args):
             decimal_value = int(''.join(map(str, vector)), 2)
             result_list.append((C1, decimal_value))
             found.value = True
+            return  # 中断
+
     return 1
 
 def main():
@@ -88,7 +91,8 @@ def main():
         
         with Pool() as pool:
             for _ in tqdm(pool.imap_unordered(calculate_A_batch, ranges), total=2**(matrix_size-1)//chunk_size, desc="Finding satisfying graph"):
-                pass
+                if found.value:
+                    break
 
         result_list = []
         while not result_queue.empty():
