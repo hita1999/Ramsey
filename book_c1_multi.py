@@ -81,6 +81,8 @@ def main():
         first_target_size = int(input("first_target_book: "))
         second_target_size = int(input("second_target_book: "))
         matrix_size = int(input("matrix_size: "))
+        
+        print('Max', (2 ** (matrix_size - 1)))
         chunk_size = cpu_count() * 16
 
         ranges = [(i, i + chunk_size, matrix_size, first_target_size, second_target_size, found) for i in range(0, 2**(matrix_size-1), chunk_size)]
