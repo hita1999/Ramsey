@@ -4,6 +4,7 @@ from tqdm import tqdm
 import numpy as np
 from scipy.linalg import circulant
 from numba import jit
+import sys
 
 @jit(nopython=True)
 def set_indices(target_matrix, target_size, condition):
@@ -55,8 +56,7 @@ def calculate_A_batch(args):
         vector = integer_to_binary(matrix_size, i)
         counter += calculate_A((vector, first_target_size, second_target_size, found, result_list))
 
-    if found.value:
-        result_queue.put(result_list)
+    result_queue.put(result_list)
     return counter
 
 def calculate_A(args):
@@ -71,8 +71,8 @@ def calculate_A(args):
             decimal_value = int(''.join(map(str, vector)), 2)
             result_list.append((C1, decimal_value))
             found.value = True
-            return  # 中断
-
+            save_matrix_to_txt(C1, f'generatedMatrix/circulantBlock/C1_{decimal_value}.txt')
+            print(decimal_value)
     return 1
 
 def main():
@@ -98,12 +98,7 @@ def main():
         while not result_queue.empty():
             result_list.extend(result_queue.get())
 
-        if found.value:
-            for matrix, decimal_value in result_list:
-                save_matrix_to_txt(matrix, f'generatedMatrix/circulantBlock/C1_{decimal_value}.txt')
-                print(decimal_value)
-
-        else:
+        if not found.value:
             print('not found')
 
 if __name__ == "__main__":
