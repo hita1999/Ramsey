@@ -83,7 +83,7 @@ def calculate_A(args):
     assign_matrix_to_A(A, C1, 0, matrix_size//2, 0, matrix_size//2)
 
     #C2
-    for matrix2_index in range(2 ** (matrix_size // 2 - 1)):
+    for matrix2_index in range(2 ** (matrix_size // 2)):
         vector2 = integer_to_binary(matrix_size // 2, matrix2_index)
 
         C2 = circulant_numba(vector2)
@@ -91,7 +91,7 @@ def calculate_A(args):
         assign_matrix_to_A(A, C2, 0, matrix_size//2, matrix_size//2, matrix_size)
         assign_matrix_to_A(A, C2.T, matrix_size//2, matrix_size, 0, matrix_size//2)
 
-        for matrix3_index in range(2 ** (matrix_size // 4 - 1)):
+        for matrix3_index in range(2 ** (matrix_size // 4)):
             vector3 = diagonal_integer_to_binary(matrix_size // 4, matrix3_index)
             C3 = circulant_numba(vector3)
 
@@ -103,7 +103,7 @@ def calculate_A(args):
             if ret == 0:
                 ret2 = set_indices(A, second_target_size, 0)
                 if ret2 == 0:
-                    decimal_value = sum(int(''.join(map(str, vec)), 2) * (2 ** (matrix_size // 2 - 1)) ** exp for vec, exp in zip([vector, vector2, vector3], [2, 1, 0]))
+                    decimal_value = matrix_index * matrix2_index * matrix3_index
                     return A, vector, vector2, vector3, decimal_value
 
     return None
@@ -118,7 +118,7 @@ def main():
 
     print('Max', (2 ** (2 * (matrix_size // 4) + (matrix_size // 2))))
 
-    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size) for matrix_index in range(2 ** (matrix_size // 4 - 1))]
+    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size) for matrix_index in range(2 ** (matrix_size // 4))]
 
     with Pool() as pool:
         for result in tqdm(pool.imap_unordered(calculate_A, args_list), total=len(args_list), desc="Finding satisfying graph", position=0, leave=True):

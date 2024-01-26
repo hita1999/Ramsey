@@ -1,10 +1,9 @@
 from multiprocessing import Pool, cpu_count, Manager
 from tqdm import tqdm
 import numpy as np
-from scipy.linalg import circulant
 from numba import jit
 
-@jit(nopython=True, cache=True)
+#@jit(nopython=True, cache=True)
 def set_indices(target_matrix, target_size, condition):
     n = len(target_matrix)
     ret = -1
@@ -33,14 +32,14 @@ def set_indices(target_matrix, target_size, condition):
 
     return ret
 
-@jit(nopython=True, cache=True)
+#@jit(nopython=True, cache=True)
 def integer_to_binary(cir_size, i):
     binary_array = np.zeros(cir_size, dtype=np.uint8)
     for j in range(cir_size-1, -1, -1):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
     return binary_array
 
-@jit(nopython=True, cache=True)
+#@jit(nopython=True, cache=True)
 def triu_numba(matrix):
     m, n = matrix.shape
     result = np.zeros_like(matrix)
@@ -51,7 +50,7 @@ def triu_numba(matrix):
 
     return result
 
-@jit(nopython=True, cache=True)
+#@jit(nopython=True, cache=True)
 def circulant_numba(c):
     c = np.asarray(c).ravel()
     L = len(c)
@@ -63,39 +62,46 @@ def circulant_numba(c):
 
     return result
 
-@jit(nopython=True, cache=True)
+#@jit(nopython=True, cache=True)
 def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
     A[row_start:row_end, col_start:col_end] = matrix
+    
+
+def diagonal_integer_to_binary(cir_size, i):
+    binary_array = np.zeros(cir_size, dtype=np.uint8)
+    for j in range(cir_size-1, -1, -1):
+        binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
+    
+    reversed_binary_array = np.flip(binary_array)
+    combined_array = np.concatenate([[0], binary_array, reversed_binary_array])
+    
+    return combined_array
 
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
 def calculate_A(args):
-    matrix_size, matrix_index, first_target_size, second_target_size, found = args
+    matrix_size, matrix_index, first_target_size, second_target_size = args
 
     A = np.zeros((matrix_size, matrix_size), dtype=np.uint8)
 
     counter = 0
-    vector = integer_to_binary(matrix_size // 2, matrix_index)
+    vector = diagonal_integer_to_binary(matrix_size // 4, matrix_index)
     C1 = circulant_numba(vector)
-    C1 = triu_numba(C1) + triu_numba(C1).T
 
     assign_matrix_to_A(A, C1, 0, matrix_size//2, 0, matrix_size//2)
 
-    for matrix2_index in range(2 ** (matrix_size // 2 - 1)):
-        vector2 = integer_to_binary(matrix_size // 2, matrix2_index)
+    for matrix2_index in range(2 ** (matrix_size // 4)):
+        vector2 = diagonal_integer_to_binary(matrix_size // 4, matrix2_index)
 
         C2 = circulant_numba(vector2)
-        C2 = triu_numba(C2) + triu_numba(C2).T
 
         assign_matrix_to_A(A, C2, 0, matrix_size//2, matrix_size//2, matrix_size)
         assign_matrix_to_A(A, C2.T, matrix_size//2, matrix_size, 0, matrix_size//2)
 
-        for matrix3_index in range(2 ** (matrix_size // 2 - 1)):
-            vector3 = integer_to_binary(matrix_size // 2, matrix3_index)
+        for matrix3_index in range(2 ** (matrix_size // 4)):
+            vector3 = diagonal_integer_to_binary(matrix_size // 4, matrix3_index)
             C3 = circulant_numba(vector3)
-            C3 = triu_numba(C3) + triu_numba(C3).T
-
 
             assign_matrix_to_A(A, C3, matrix_size//2, matrix_size, matrix_size//2, matrix_size)
 
@@ -105,10 +111,13 @@ def calculate_A(args):
             if ret == 0:
                 ret2 = set_indices(A, second_target_size, 0)
                 if ret2 == 0:
-                    decimal_value = sum(int(''.join(map(str, vec)), 2) * (2 ** (matrix_size // 2 - 1)) ** exp for vec, exp in zip([vector, vector2, vector3], [2, 1, 0]))
+                    print('found!')
+                    decimal_value = matrix_index * matrix2_index * matrix3_index
                     return A, vector, vector2, vector3, decimal_value
 
     return None
+
+
 
 def main():
     manager = Manager()
@@ -118,9 +127,9 @@ def main():
     second_target_size = int(input("second_target_book: "))
     matrix_size = int(input("matrix_size: "))
 
-    print('Max', (2 ** (matrix_size // 2 - 1))**3)
+    print('Max', (2 ** (2 * (matrix_size // 4) + (matrix_size // 4 + 1))))
 
-    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size, found) for matrix_index in range(2 ** (matrix_size // 2 - 1))]
+    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size) for matrix_index in range(2 ** (matrix_size // 4))]
 
     with Pool() as pool:
         for result in tqdm(pool.imap_unordered(calculate_A, args_list), total=len(args_list), desc="Finding satisfying graph", position=0, leave=True):
