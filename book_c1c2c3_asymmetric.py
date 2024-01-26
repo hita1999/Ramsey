@@ -93,7 +93,7 @@ def calculate_A(args):
 
     counter = 0
 
-    vector = diagonal_integer_to_binary(matrix_size // 4, matrix_index)
+    vector = diagonal_integer_to_binary(matrix_size, matrix_index)
     C1 = circulant_numba(vector)
 
     assign_matrix_to_A(A, C1, 0, matrix_size//2, 0, matrix_size//2)
