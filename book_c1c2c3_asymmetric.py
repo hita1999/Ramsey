@@ -100,7 +100,7 @@ def calculate_A(args):
 
     # C2
     for matrix2_index in range(2 ** (matrix_size // 2)):
-        vector2 = integer_to_binary(matrix_size, matrix2_index)
+        vector2 = integer_to_binary(matrix_size // 2, matrix2_index)
 
         C2 = circulant_numba(vector2)
 
