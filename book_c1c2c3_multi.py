@@ -81,7 +81,6 @@ def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
 
 def diagonal_integer_to_binary(matrix_size, i):
     cir_size = matrix_size // 4
-    #余りを取る
     r = matrix_size % 4
     
     binary_array = np.zeros(cir_size, dtype=np.uint8)
