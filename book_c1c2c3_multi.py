@@ -4,9 +4,8 @@ from tqdm import tqdm
 import numpy as np
 from numba import jit
 
-# @jit(nopython=True, cache=True)
 
-
+@jit(nopython=True, cache=True)
 def set_indices(target_matrix, target_size, condition):
     n = len(target_matrix)
     ret = -1
@@ -36,18 +35,16 @@ def set_indices(target_matrix, target_size, condition):
 
     return ret
 
-# @jit(nopython=True, cache=True)
 
-
+@jit(nopython=True, cache=True)
 def integer_to_binary(cir_size, i):
     binary_array = np.zeros(cir_size, dtype=np.uint8)
     for j in range(cir_size-1, -1, -1):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
     return binary_array
 
-# @jit(nopython=True, cache=True)
 
-
+@jit(nopython=True, cache=True)
 def triu_numba(matrix):
     m, n = matrix.shape
     result = np.zeros_like(matrix)
@@ -58,9 +55,8 @@ def triu_numba(matrix):
 
     return result
 
-# @jit(nopython=True, cache=True)
 
-
+@jit(nopython=True, cache=True)
 def circulant_numba(c):
     c = np.asarray(c).ravel()
     L = len(c)
@@ -72,9 +68,8 @@ def circulant_numba(c):
 
     return result
 
-# @jit(nopython=True, cache=True)
 
-
+@jit(nopython=True, cache=True)
 def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
     A[row_start:row_end, col_start:col_end] = matrix
 
@@ -82,17 +77,18 @@ def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
 def diagonal_integer_to_binary(matrix_size, i):
     cir_size = matrix_size // 4
     r = matrix_size % 4
-    
+
     binary_array = np.zeros(cir_size, dtype=np.uint8)
     for j in range(cir_size-1, -1, -1):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
 
     reversed_binary_array = np.flip(binary_array)
-    
+
     if r == 0:
         combined_array = np.concatenate([binary_array, reversed_binary_array])
     else:
-        combined_array = np.concatenate([[0], binary_array, reversed_binary_array])
+        combined_array = np.concatenate(
+            [[0], binary_array, reversed_binary_array])
 
     return combined_array
 
