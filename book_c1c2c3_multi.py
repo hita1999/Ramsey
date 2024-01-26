@@ -79,13 +79,21 @@ def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
     A[row_start:row_end, col_start:col_end] = matrix
 
 
-def diagonal_integer_to_binary(cir_size, i):
+def diagonal_integer_to_binary(matrix_size, i):
+    cir_size = matrix_size // 4
+    #余りを取る
+    r = matrix_size % 4
+    
     binary_array = np.zeros(cir_size, dtype=np.uint8)
     for j in range(cir_size-1, -1, -1):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
 
     reversed_binary_array = np.flip(binary_array)
-    combined_array = np.concatenate([[0], binary_array, reversed_binary_array])
+    
+    if r == 0:
+        combined_array = np.concatenate([binary_array, reversed_binary_array])
+    else:
+        combined_array = np.concatenate([[0], binary_array, reversed_binary_array])
 
     return combined_array
 
@@ -100,13 +108,13 @@ def calculate_A(args):
     A = np.zeros((matrix_size, matrix_size), dtype=np.uint8)
 
     counter = 0
-    vector = diagonal_integer_to_binary(matrix_size // 4, matrix_index)
+    vector = diagonal_integer_to_binary(matrix_size, matrix_index)
     C1 = circulant_numba(vector)
 
     assign_matrix_to_A(A, C1, 0, matrix_size//2, 0, matrix_size//2)
 
     for matrix2_index in range(2 ** (matrix_size // 4)):
-        vector2 = diagonal_integer_to_binary(matrix_size // 4, matrix2_index)
+        vector2 = diagonal_integer_to_binary(matrix_size, matrix2_index)
 
         C2 = circulant_numba(vector2)
 
@@ -117,7 +125,7 @@ def calculate_A(args):
 
         for matrix3_index in range(2 ** (matrix_size // 4)):
             vector3 = diagonal_integer_to_binary(
-                matrix_size // 4, matrix3_index)
+                matrix_size, matrix3_index)
             C3 = circulant_numba(vector3)
 
             assign_matrix_to_A(A, C3, matrix_size//2,
