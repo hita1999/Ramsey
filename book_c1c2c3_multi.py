@@ -1,9 +1,12 @@
 from multiprocessing import Pool, cpu_count, Manager
+import time
 from tqdm import tqdm
 import numpy as np
 from numba import jit
 
-#@jit(nopython=True, cache=True)
+# @jit(nopython=True, cache=True)
+
+
 def set_indices(target_matrix, target_size, condition):
     n = len(target_matrix)
     ret = -1
@@ -24,7 +27,8 @@ def set_indices(target_matrix, target_size, condition):
 
             if condition == 0 and (target_matrix[i, j] == 0):
                 common_vertices = np.where((row_1 == 0) & (row_2 == 0))[0]
-                common_vertices = np.array([x for x in common_vertices if x not in spine_indices])
+                common_vertices = np.array(
+                    [x for x in common_vertices if x not in spine_indices])
                 if len(common_vertices) < target_size:
                     ret = 0
                 else:
@@ -32,14 +36,18 @@ def set_indices(target_matrix, target_size, condition):
 
     return ret
 
-#@jit(nopython=True, cache=True)
+# @jit(nopython=True, cache=True)
+
+
 def integer_to_binary(cir_size, i):
     binary_array = np.zeros(cir_size, dtype=np.uint8)
     for j in range(cir_size-1, -1, -1):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
     return binary_array
 
-#@jit(nopython=True, cache=True)
+# @jit(nopython=True, cache=True)
+
+
 def triu_numba(matrix):
     m, n = matrix.shape
     result = np.zeros_like(matrix)
@@ -50,7 +58,9 @@ def triu_numba(matrix):
 
     return result
 
-#@jit(nopython=True, cache=True)
+# @jit(nopython=True, cache=True)
+
+
 def circulant_numba(c):
     c = np.asarray(c).ravel()
     L = len(c)
@@ -62,23 +72,27 @@ def circulant_numba(c):
 
     return result
 
-#@jit(nopython=True, cache=True)
+# @jit(nopython=True, cache=True)
+
+
 def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
     A[row_start:row_end, col_start:col_end] = matrix
-    
+
 
 def diagonal_integer_to_binary(cir_size, i):
     binary_array = np.zeros(cir_size, dtype=np.uint8)
     for j in range(cir_size-1, -1, -1):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
-    
+
     reversed_binary_array = np.flip(binary_array)
     combined_array = np.concatenate([[0], binary_array, reversed_binary_array])
-    
+
     return combined_array
+
 
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
+
 
 def calculate_A(args):
     matrix_size, matrix_index, first_target_size, second_target_size = args
@@ -96,14 +110,18 @@ def calculate_A(args):
 
         C2 = circulant_numba(vector2)
 
-        assign_matrix_to_A(A, C2, 0, matrix_size//2, matrix_size//2, matrix_size)
-        assign_matrix_to_A(A, C2.T, matrix_size//2, matrix_size, 0, matrix_size//2)
+        assign_matrix_to_A(A, C2, 0, matrix_size//2,
+                           matrix_size//2, matrix_size)
+        assign_matrix_to_A(A, C2.T, matrix_size//2,
+                           matrix_size, 0, matrix_size//2)
 
         for matrix3_index in range(2 ** (matrix_size // 4)):
-            vector3 = diagonal_integer_to_binary(matrix_size // 4, matrix3_index)
+            vector3 = diagonal_integer_to_binary(
+                matrix_size // 4, matrix3_index)
             C3 = circulant_numba(vector3)
 
-            assign_matrix_to_A(A, C3, matrix_size//2, matrix_size, matrix_size//2, matrix_size)
+            assign_matrix_to_A(A, C3, matrix_size//2,
+                               matrix_size, matrix_size//2, matrix_size)
 
             counter += 1
 
@@ -118,7 +136,6 @@ def calculate_A(args):
     return None
 
 
-
 def main():
     manager = Manager()
     found = manager.Value('b', False)  # 'b' stands for boolean
@@ -129,14 +146,17 @@ def main():
 
     print('Max', (2 ** (2 * (matrix_size // 4) + (matrix_size // 4 + 1))))
 
-    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size) for matrix_index in range(2 ** (matrix_size // 4))]
+    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size)
+                 for matrix_index in range(2 ** (matrix_size // 4))]
 
+    start = time.time()
     with Pool() as pool:
         for result in tqdm(pool.imap_unordered(calculate_A, args_list), total=len(args_list), desc="Finding satisfying graph", position=0, leave=True):
             if result is not None:
                 A, vector, vector2, vector3, decimal_value = result
                 print('found!')
-                save_matrix_to_txt(A, f'generatedMatrix/circulantBlock/C1C2C3_{decimal_value}.txt')
+                save_matrix_to_txt(
+                    A, f'generatedMatrix/circulantBlock/C1C2C3_{decimal_value}.txt')
                 print(decimal_value)
                 print(vector)
                 print(vector2)
@@ -144,8 +164,12 @@ def main():
                 found.value = True
                 break
 
+    end = time.time()
     if not found.value:
         print('not found')
+
+    print('elapsed time: ', end - start)
+
 
 if __name__ == "__main__":
     main()
