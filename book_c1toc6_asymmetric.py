@@ -101,32 +101,34 @@ def calculate_A(args):
 
     assign_matrix_to_A(A, C1, 0, matrix_size//3, 0, matrix_size//3)
     
-    
+    #C2
     for matrix2_index in range(2 ** (matrix_size // 6)):
-        vector2 = diagonal_integer_to_binary(matrix_size, matrix2_index)
+        vector2 = integer_to_binary(matrix_size // 3, matrix2_index)
         C2 = circulant_numba(vector2)
 
         assign_matrix_to_A(A, C2, 0, matrix_size//3, matrix_size//3, 2*matrix_size//3)
         assign_matrix_to_A(A, C2.T, matrix_size//3, 2*matrix_size//3, 0, matrix_size//3)
 
 
-        
+        #C3
         for matrix3_index in range(2 ** (matrix_size // 6)):
-            vector3 = diagonal_integer_to_binary(matrix_size, matrix3_index)
+            vector3 = integer_to_binary(matrix_size // 3, matrix3_index)
             C3 = circulant_numba(vector3)
 
 
             assign_matrix_to_A(A, C3, 0, matrix_size//3, 2*matrix_size//3, matrix_size)
             assign_matrix_to_A(A, C3.T, 2*matrix_size//3, matrix_size, 0, matrix_size//3)
             
+            #C4
             for matrix4_index in range(2 ** (matrix_size // 6)):
                 vector4 = diagonal_integer_to_binary(matrix_size, matrix4_index)
                 C4 = circulant_numba(vector4)
 
                 assign_matrix_to_A(A, C4, matrix_size//3, 2*matrix_size//3, matrix_size//3, 2*matrix_size//3)
                 
+                #C5
                 for matrix5_index in range(2 ** (matrix_size // 6)):
-                    vector5 = diagonal_integer_to_binary(matrix_size, matrix5_index)
+                    vector5 = integer_to_binary(matrix_size // 3, matrix5_index)
                     C5 = circulant_numba(vector5)
 
 
@@ -157,7 +159,7 @@ def main():
     second_target_size = int(input("second_target_book: "))
     matrix_size = int(input("matrix_size: "))
 
-    print('Max', (2 ** (3 * (matrix_size // 6) + 3 * (matrix_size // 6 + 1))))
+    print('Max', (2 ** (3 * (matrix_size // 6) + 3 * (matrix_size // 3))))
 
     args_list = [(matrix_size, matrix_index, first_target_size, second_target_size) for matrix_index in range(2 ** (matrix_size // 6))]
 
