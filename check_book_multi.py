@@ -1,9 +1,11 @@
+import cProfile
 import itertools
 from math import comb
-import time
+from multiprocessing import Pool
+import pstats
 import numpy as np
 from tqdm import tqdm
-from multiprocessing import Pool, cpu_count
+
 
 def read_adjacency_matrix(file_path):
     adjacency_matrix = []
@@ -13,54 +15,21 @@ def read_adjacency_matrix(file_path):
             adjacency_matrix.append(row)
     return np.array(adjacency_matrix)
 
-def multi_generate_combinations(total, size, start, end):
-    return itertools.islice(itertools.combinations(range(total), size), start, end)
 
-def search_book(matrix, page, spine, condition_func):
+def generate_combinations(elements, size):
+    return itertools.combinations(elements, size)
 
-    if condition_func(matrix, page, spine):
-        return True
+def worker(args):
+    spine_indices, original_matrix, target_size, condition = args
+    if original_matrix[np.ix_(spine_indices, spine_indices)].sum() == condition:
+        remaining_indices = set(range(len(original_matrix))) - set(spine_indices)
 
-def condition_function_1(matrix, page, spine):
-    return matrix[np.ix_(spine, spine)].sum() == 2 and matrix[np.ix_(spine, page)].sum() == len(page) * 2
-
-def condition_function_2(matrix, page, spine):
-    return matrix[np.ix_(spine, spine)].sum() == 0 and matrix[np.ix_(spine, page)].sum() == 0
-
-def find_satisfying_graph_partial(args):
-    original_matrix, target_size, condition_func, start, end = args
-    progress_bar = tqdm(total=(end - start), desc="Finding satisfying graph")
-    
-    for page_indices in multi_generate_combinations(len(original_matrix), target_size, start, end):
-        remaining_indices = set(range(len(original_matrix))) - set(page_indices)
-
-        for spine_indices in itertools.combinations(remaining_indices, 2):
-            progress_bar.update(1)
+        for page_indices in generate_combinations(remaining_indices, target_size):
             if set(spine_indices).isdisjoint(set(page_indices)):
-                if search_book(original_matrix, page_indices, spine_indices, condition_func):
-                    progress_bar.close()
+                if original_matrix[np.ix_(spine_indices, page_indices)].sum() == len(page_indices) * condition:
                     return 1, spine_indices, page_indices
-    
-    progress_bar.close()
     return 0, 0, 0
 
-def find_satisfying_graph_parallel(original_matrix, target_size, condition_func):
-    original_matrix_number_of_rows = original_matrix.shape[0]
-    total_combinations = comb(original_matrix_number_of_rows, target_size) * comb(original_matrix_number_of_rows - target_size, 2)
-    
-    num_threads = cpu_count()
-    chunk_size = total_combinations // num_threads
-    
-    args_list = [(original_matrix, target_size, condition_func, i * chunk_size, (i + 1) * chunk_size) for i in range(num_threads)]
-    
-    with Pool(num_threads) as pool:
-        results = pool.map(find_satisfying_graph_partial, args_list)
-    
-    for result in results:
-        if result[0] == 1:
-            return result
-    
-    return 0, 0, 0
 
 def print_results(file_path, target_path, result, ret_spine_indices, ret_page_indices, graph_type):
     if result == 1:
@@ -69,26 +38,64 @@ def print_results(file_path, target_path, result, ret_spine_indices, ret_page_in
         print("page_indices:", ret_page_indices)
         print("spine_indices:", ret_spine_indices)
         print("for drawing graph, please run drawGraph.py", ret_page_indices + ret_spine_indices)
+    else:
+        print(f"{file_path}には{target_path}が見つかりませんでした")
+        
+
+def flip_matrix(matrix):
+    new_matrix = 1 - matrix
+    np.fill_diagonal(new_matrix, 0)
+    return new_matrix
+
+def find_satisfying_graph_parallel(original_matrix, target_size, condition, args_list):
+    with Pool() as pool, tqdm(total=len(args_list), desc="Finding satisfying graph") as pbar:
+        results = list(tqdm(pool.imap_unordered(worker, [(args, original_matrix, target_size, condition) for args in args_list]), total=len(args_list)))
+
+    for result, ret_spine_indices, ret_page_indices in results:
+        if result == 1:
+            return result, ret_spine_indices, ret_page_indices
+        pbar.update(1)
+
+    return 0, 0, 0
+
 
 def main():
-    file_path = 'adjcencyMatrix/Paley/Paley25.txt'
+    file_path = 'generatedMatrix/circulantBlock/cir18B3B6/C1C2C3_1332.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
-    print("original_matrix")
+
+    #original_matrix = flip_matrix(original_matrix)
+    print("matrix", original_matrix)
     first_target_size = int(input("first_target_book: "))
     second_target_size = int(input("second_target_book: "))
 
     first_target_path = f'targetAdjcencyMatrix/B{first_target_size}.txt'
     second_target_path = f'targetAdjcencyMatrix/B{second_target_size}.txt'
+    
+    args_list = [spine_indices for spine_indices in generate_combinations(range(len(original_matrix)), 2)]
 
-    result1, ret_spine_indices1, ret_page_indices1 = find_satisfying_graph_parallel(original_matrix, first_target_size, condition_function_1)
-    
-    time.sleep(1)
-    
-    result2, ret_spine_indices2, ret_page_indices2 = find_satisfying_graph_parallel(original_matrix, second_target_size, condition_function_2)
+    result1, ret_spine_indices1, ret_page_indices1 = find_satisfying_graph_parallel(original_matrix, first_target_size, 2, args_list)
+    result2, ret_spine_indices2, ret_page_indices2 = find_satisfying_graph_parallel(original_matrix, second_target_size, 0, args_list)
 
     print_results(file_path, first_target_path, result1, ret_spine_indices1, ret_page_indices1, "first")
     print_results(file_path, second_target_path, result2, ret_spine_indices2, ret_page_indices2, "second")
 
+
 if __name__ == "__main__":
+    profile_filename = f"res_profile/profile_check_B4B5_1_m1.txt"
+
+    # プロファイリングを開始
+    profile = cProfile.Profile()
+    profile.enable()
+
+    # 実際の処理を実行
     main()
+
+    # プロファイリングを停止
+    profile.disable()
+
+    # プロファイリング結果を保存
+    with open(profile_filename, "w") as f:
+        stats = pstats.Stats(profile, stream=f)
+        stats.sort_stats("cumulative")
+        stats.print_stats()
