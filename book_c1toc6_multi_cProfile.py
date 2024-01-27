@@ -72,9 +72,31 @@ def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
+@jit(nopython=True, cache=True)    
+def diagonal_integer_to_binary(matrix_size, i):
+    cir_size = matrix_size // 6
+    r = matrix_size % 6
+
+    binary_array = np.zeros(cir_size, dtype=np.uint8)
+    for j in range(cir_size-1, -1, -1):
+        binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
+
+    reversed_binary_array = binary_array[::-1]
+
+    if r == 0:
+        combined_array = np.zeros(2 * cir_size, dtype=np.uint8)
+        combined_array[:cir_size] = binary_array
+        combined_array[cir_size:] = reversed_binary_array
+    else:
+        combined_array = np.zeros(2 * cir_size + 1, dtype=np.uint8)
+        combined_array[1:cir_size+1] = binary_array
+        combined_array[cir_size+1:] = reversed_binary_array
+
+    return combined_array
+
 
 def calculate_A_and_profile(args):
-    matrix_size, matrix_index, first_target_size, second_target_size, found = args
+    matrix_size, matrix_index, first_target_size, second_target_size = args
     if matrix_index == 0:
         # プロファイリング用のファイル名
         profile_filename = f"res_profile/profile_results_B3B6_1.txt"
@@ -100,58 +122,51 @@ def calculate_A_and_profile(args):
 
 
 def calculate_A(args):
-    matrix_size, matrix_index, first_target_size, second_target_size, found = args
+    matrix_size, matrix_index, first_target_size, second_target_size = args
     
     A = np.zeros((matrix_size, matrix_size), dtype=np.uint8)
-    
-    
+     
     counter = 0
-    vector = integer_to_binary(matrix_size // 3, matrix_index)
+    vector = diagonal_integer_to_binary(matrix_size, matrix_index)
     C1 = circulant_numba(vector)
-    C1 = triu_numba(C1) + triu_numba(C1).T
 
     assign_matrix_to_A(A, C1, 0, matrix_size//3, 0, matrix_size//3)
     
     
-    for matrix2_index in range(2 ** (matrix_size // 3 - 1)):
-        vector2 = integer_to_binary(matrix_size // 3, matrix2_index)
+    for matrix2_index in range(2 ** (matrix_size // 6)):
+        vector2 = diagonal_integer_to_binary(matrix_size, matrix2_index)
         C2 = circulant_numba(vector2)
-        C2 = triu_numba(C2) + triu_numba(C2).T
 
         assign_matrix_to_A(A, C2, 0, matrix_size//3, matrix_size//3, 2*matrix_size//3)
         assign_matrix_to_A(A, C2.T, matrix_size//3, 2*matrix_size//3, 0, matrix_size//3)
 
 
         
-        for matrix3_index in range(2 ** (matrix_size // 3 - 1)):
-            vector3 = integer_to_binary(matrix_size // 3, matrix3_index)
+        for matrix3_index in range(2 ** (matrix_size // 6)):
+            vector3 = diagonal_integer_to_binary(matrix_size, matrix3_index)
             C3 = circulant_numba(vector3)
-            C3 = triu_numba(C3) + triu_numba(C3).T
 
 
             assign_matrix_to_A(A, C3, 0, matrix_size//3, 2*matrix_size//3, matrix_size)
             assign_matrix_to_A(A, C3.T, 2*matrix_size//3, matrix_size, 0, matrix_size//3)
             
-            for matrix4_index in range(2 ** (matrix_size // 3 - 1)):
-                vector4 = integer_to_binary(matrix_size // 3, matrix4_index)
+            for matrix4_index in range(2 ** (matrix_size // 6)):
+                vector4 = diagonal_integer_to_binary(matrix_size, matrix4_index)
                 C4 = circulant_numba(vector4)
-                C4 = triu_numba(C4) + triu_numba(C4).T
 
                 assign_matrix_to_A(A, C4, matrix_size//3, 2*matrix_size//3, matrix_size//3, 2*matrix_size//3)
                 
-                for matrix5_index in range(2 ** (matrix_size // 3 - 1)):
-                    vector5 = integer_to_binary(matrix_size // 3, matrix5_index)
+                for matrix5_index in range(2 ** (matrix_size // 6)):
+                    vector5 = diagonal_integer_to_binary(matrix_size, matrix5_index)
                     C5 = circulant_numba(vector5)
-                    C5 = triu_numba(C5) + triu_numba(C5).T
 
 
                     assign_matrix_to_A(A, C5, matrix_size//3, 2*matrix_size//3, 2*matrix_size//3, matrix_size)
                     assign_matrix_to_A(A, C5.T, 2*matrix_size//3, matrix_size, matrix_size//3, 2*matrix_size//3)
                     
-                    for matrix6_index in range(2 ** (matrix_size // 3 - 1)):
-                        vector6 = integer_to_binary(matrix_size // 3, matrix6_index)
+                    for matrix6_index in range(2 ** (matrix_size // 6)):
+                        vector6 = diagonal_integer_to_binary(matrix_size, matrix6_index)
                         C6 = circulant_numba(vector6)
-                        C6 = triu_numba(C6) + triu_numba(C6).T
 
                         assign_matrix_to_A(A, C6, 2*matrix_size//3, matrix_size, 2*matrix_size//3, matrix_size)
                         counter += 1
@@ -160,9 +175,8 @@ def calculate_A(args):
                         if ret == 0:
                             ret2 = set_indices(A, second_target_size, 0)
                             if ret2 == 0:
-                                decimal_value = sum(int(''.join(map(str, vec)), 2) * (2 ** (matrix_size // 3 - 1)) ** exp for vec, exp in zip([vector, vector2, vector3, vector4, vector5, vector6], [5, 4, 3, 2, 1, 0]))
-
-                                print('found!')
+                                print('found')
+                                decimal_value = 2**5*matrix_index + 2**4*matrix2_index + 2**3*matrix3_index + 2**2*matrix4_index + 2**1*matrix5_index + 2**0*matrix6_index
                                 print(decimal_value)
                                 return A, vector, vector2, vector3, vector4, vector5, vector6, decimal_value
 
@@ -176,9 +190,9 @@ def main():
     second_target_size = int(input("second_target_book: "))
     matrix_size = int(input("matrix_size: "))
 
-    print('Max', (2 ** (matrix_size // 3 - 1))**6)
+    print('Max', (2 ** (3 * (matrix_size // 6) + 3 * (matrix_size // 6 + 1))))
 
-    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size, found) for matrix_index in range(2 ** (matrix_size // 3 - 1))]
+    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size) for matrix_index in range(2 ** (matrix_size // 6))]
 
     with Pool() as pool:
         results = list(pool.imap_unordered(calculate_A_and_profile, args_list))

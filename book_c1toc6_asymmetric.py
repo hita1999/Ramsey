@@ -68,10 +68,8 @@ def circulant_numba(c):
 @jit(nopython=True, cache=True)
 def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
     A[row_start:row_end, col_start:col_end] = matrix
-
-def save_matrix_to_txt(matrix, file_path):
-    np.savetxt(file_path, matrix, fmt='%d', delimiter='')
     
+@jit(nopython=True, cache=True)    
 def diagonal_integer_to_binary(matrix_size, i):
     cir_size = matrix_size // 6
     r = matrix_size % 6
@@ -80,15 +78,21 @@ def diagonal_integer_to_binary(matrix_size, i):
     for j in range(cir_size-1, -1, -1):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
 
-    reversed_binary_array = np.flip(binary_array)
+    reversed_binary_array = binary_array[::-1]
 
     if r == 0:
-        combined_array = np.concatenate([binary_array, reversed_binary_array])
+        combined_array = np.zeros(2 * cir_size, dtype=np.uint8)
+        combined_array[:cir_size] = binary_array
+        combined_array[cir_size:] = reversed_binary_array
     else:
-        combined_array = np.concatenate(
-            [[0], binary_array, reversed_binary_array])
+        combined_array = np.zeros(2 * cir_size + 1, dtype=np.uint8)
+        combined_array[1:cir_size+1] = binary_array
+        combined_array[cir_size+1:] = reversed_binary_array
 
     return combined_array
+
+def save_matrix_to_txt(matrix, file_path):
+    np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
 def calculate_A(args):
     matrix_size, matrix_index, first_target_size, second_target_size = args
@@ -170,7 +174,7 @@ def main():
             if result is not None:
                 A, vector, vector2, vector3, vector4, vector5, vector6, decimal_value = result
                 print('found!')
-                save_matrix_to_txt(A, f'generatedMatrix/circulantBlock/C1toC6_{decimal_value}.txt')
+                save_matrix_to_txt(A, f'generatedMatrix/circulantBlock/C1toC6_asymmetric_{decimal_value}.txt')
                 print(decimal_value)
                 print(vector)
                 print(vector2)

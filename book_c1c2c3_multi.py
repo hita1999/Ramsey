@@ -73,7 +73,7 @@ def circulant_numba(c):
 def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
     A[row_start:row_end, col_start:col_end] = matrix
 
-
+@jit(nopython=True, cache=True)
 def diagonal_integer_to_binary(matrix_size, i):
     cir_size = matrix_size // 4
     r = matrix_size % 4
@@ -82,13 +82,16 @@ def diagonal_integer_to_binary(matrix_size, i):
     for j in range(cir_size-1, -1, -1):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
 
-    reversed_binary_array = np.flip(binary_array)
+    reversed_binary_array = binary_array[::-1]
 
     if r == 0:
-        combined_array = np.concatenate([binary_array, reversed_binary_array])
+        combined_array = np.zeros(2 * cir_size, dtype=np.uint8)
+        combined_array[:cir_size] = binary_array
+        combined_array[cir_size:] = reversed_binary_array
     else:
-        combined_array = np.concatenate(
-            [[0], binary_array, reversed_binary_array])
+        combined_array = np.zeros(2 * cir_size + 1, dtype=np.uint8)
+        combined_array[1:cir_size+1] = binary_array
+        combined_array[cir_size+1:] = reversed_binary_array
 
     return combined_array
 
