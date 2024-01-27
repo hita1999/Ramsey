@@ -1,5 +1,7 @@
+import cProfile
 import itertools
 from math import comb
+import pstats
 import numpy as np
 from tqdm import tqdm
 from numba import jit
@@ -62,7 +64,7 @@ def flip_matrix(matrix):
 
 
 def main():
-    file_path = 'adjcencyMatrix/Paley/Paley9_double18.txt'
+    file_path = 'generatedMatrix/circulantBlock/cir30B7B8/C1C2C3_asymmetric_2908290.txt'
     original_matrix = read_adjacency_matrix(file_path)
 
 
@@ -82,4 +84,20 @@ def main():
 
 
 if __name__ == "__main__":
+    profile_filename = f"res_profile/profile_check_B7B8_1_3900X.txt"
+
+    # プロファイリングを開始
+    profile = cProfile.Profile()
+    profile.enable()
+
+    # 実際の処理を実行
     main()
+
+    # プロファイリングを停止
+    profile.disable()
+
+    # プロファイリング結果を保存
+    with open(profile_filename, "w") as f:
+        stats = pstats.Stats(profile, stream=f)
+        stats.sort_stats("cumulative")
+        stats.print_stats()
