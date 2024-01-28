@@ -37,6 +37,7 @@ def set_indices(target_matrix, target_size, condition):
 
     return ret
 
+@jit(nopython=True, cache=True)
 def diagonal_integer_to_binary(matrix_size, i):
     cir_size = matrix_size // 2
     r = matrix_size % 2
@@ -48,10 +49,14 @@ def diagonal_integer_to_binary(matrix_size, i):
     reversed_binary_array = binary_array[::-1]
 
     if r == 0:
-        combined_array = np.concatenate([[0], binary_array, reversed_binary_array[1:]])
+        combined_array = np.zeros(2 * cir_size, dtype=np.uint8)
+        combined_array[1:cir_size+1] = binary_array
+        combined_array[cir_size+1:] = reversed_binary_array[1:]
         
     else:
-        combined_array = np.concatenate([[0], binary_array, reversed_binary_array])
+        combined_array = np.zeros(2 * cir_size + 1, dtype=np.uint8)
+        combined_array[1:cir_size+1] = binary_array
+        combined_array[cir_size+1:] = reversed_binary_array
 
     return combined_array
 
