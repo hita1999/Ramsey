@@ -1,5 +1,6 @@
 from multiprocessing import Pool, Manager
 from os import cpu_count
+import time
 from tqdm import tqdm
 import numpy as np
 from scipy.linalg import circulant
@@ -36,79 +37,91 @@ def set_indices(target_matrix, target_size, condition):
 
     return ret
 
+def diagonal_integer_to_binary(matrix_size, i):
+    cir_size = matrix_size // 2
+    r = matrix_size % 2
 
-@jit(nopython=True)
-def integer_to_binary(cir_size, binary_index):
     binary_array = np.zeros(cir_size, dtype=np.uint8)
     for j in range(cir_size-1, -1, -1):
-        binary_array[cir_size - 1 - j] = np.right_shift(binary_index, j) & 1
-    return binary_array
+        binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
+
+    reversed_binary_array = binary_array[::-1]
+
+    if r == 0:
+        combined_array = np.concatenate([[0], binary_array, reversed_binary_array[1:]])
+        
+    else:
+        combined_array = np.concatenate([[0], binary_array, reversed_binary_array])
+
+    return combined_array
+
+@jit(nopython=True, cache=True)
+def circulant_numba(c):
+    c = np.asarray(c).ravel()
+    L = len(c)
+    result = np.zeros((L, L), dtype=c.dtype)
+
+    for i in range(L):
+        for j in range(L):
+            result[i, j] = c[(i - j) % L]
+
+    return result
 
 
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
 
-def calculate_A_batch(args):
-    start, end, matrix_size, first_target_size, second_target_size, found, result_queue = args
-    counter = 0
-    result_list = []
-
-    for i in range(start, end):
-        if i >= 2**(matrix_size-1):
-            break
-        vector = integer_to_binary(matrix_size, i)
-        counter += calculate_A((vector, first_target_size,
-                               second_target_size, found, result_list))
-
-    result_queue.put(result_list)
-    return counter
-
-
 def calculate_A(args):
-    vector, first_target_size, second_target_size, found, result_list = args
-    C1 = circulant(vector)
-    C1 = np.triu(C1) + np.triu(C1, 1).T
+    matrix_size, matrix_index, first_target_size, second_target_size = args
+    
+    counter = 0
+    vector = diagonal_integer_to_binary(matrix_size, matrix_index)
+    C1 = circulant_numba(vector)
+    
+    counter += 1
 
     ret = set_indices(C1, first_target_size, 2)
     if ret == 0:
         ret2 = set_indices(C1, second_target_size, 0)
         if ret2 == 0:
-            decimal_value = int(''.join(map(str, vector)), 2)
-            result_list.append((C1, decimal_value))
-            found.value = True
-            save_matrix_to_txt(
-                C1, f'generatedMatrix/circulantBlock/C1_{decimal_value}.txt')
-            print(decimal_value)
-    return 1
+            print('found!')
+            decimal_value = matrix_index
+            return C1, vector, decimal_value
+    return None
 
 
 def main():
-    with Manager() as manager:
-        found = manager.Value('b', False)
-        result_queue = manager.Queue()
+    manager = Manager()
+    found = manager.Value('b', False)  # 'b' stands for boolean
 
-        first_target_size = int(input("first_target_book: "))
-        second_target_size = int(input("second_target_book: "))
-        matrix_size = int(input("matrix_size: "))
+    first_target_size = int(input("first_target_book: "))
+    second_target_size = int(input("second_target_book: "))
+    matrix_size = int(input("matrix_size: "))
 
-        print('Max', (2 ** (matrix_size - 1)))
-        chunk_size = cpu_count() * 16
+    print('Max', (2 ** (matrix_size // 2)))
 
-        ranges = ((i, i + chunk_size, matrix_size, first_target_size, second_target_size,
-                  found, result_queue) for i in range(0, 2**(matrix_size-1), chunk_size))
+    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size)
+                 for matrix_index in range(2 ** (matrix_size // 2))]
 
-        with Pool() as pool:
-            for _ in tqdm(pool.imap_unordered(calculate_A_batch, ranges), total=2**(matrix_size-1)//chunk_size, desc="Finding satisfying graph"):
-                if found.value:
-                    break
+    start = time.time()
+    with Pool() as pool:
+        for result in tqdm(pool.imap_unordered(calculate_A, args_list), total=len(args_list), desc="Finding satisfying graph", position=0, leave=True):
+            if result is not None:
+                A, vector, decimal_value = result
+                print('found!')
+                save_matrix_to_txt(
+                    A, f'generatedMatrix/circulantBlock/C1_{decimal_value}.txt')
+                print(decimal_value)
+                print(vector)
+                found.value = True
+                break
 
-        result_list = []
-        while not result_queue.empty():
-            result_list.extend(result_queue.get())
+    end = time.time()
+    if not found.value:
+        print('not found')
 
-        if not found.value:
-            print('not found')
+    print('elapsed time: ', end - start)
 
 
 if __name__ == "__main__":
