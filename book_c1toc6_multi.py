@@ -83,8 +83,8 @@ def diagonal_integer_to_binary(matrix_size, i):
 
     if r == 0:
         combined_array = np.zeros(2 * cir_size, dtype=np.uint8)
-        combined_array[:cir_size] = binary_array
-        combined_array[cir_size:] = reversed_binary_array
+        combined_array[1:cir_size+1] = binary_array
+        combined_array[cir_size+1:] = reversed_binary_array[1:]
     else:
         combined_array = np.zeros(2 * cir_size + 1, dtype=np.uint8)
         combined_array[1:cir_size+1] = binary_array
