@@ -1,6 +1,7 @@
 from calendar import c
 import datetime
 from multiprocessing import Pool, cpu_count, Manager
+import time
 from tqdm import tqdm
 import numpy as np
 from numba import jit
@@ -67,88 +68,100 @@ def circulant_numba(c):
 @jit(nopython=True, cache=True)
 def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
     A[row_start:row_end, col_start:col_end] = matrix
+    
+@jit(nopython=True, cache=True)
+def diagonal_integer_to_binary(matrix_size, i):
+    cir_size = matrix_size // 8
+    r = matrix_size % 8
+
+    binary_array = np.zeros(cir_size, dtype=np.uint8)
+    for j in range(cir_size-1, -1, -1):
+        binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
+
+    reversed_binary_array = binary_array[::-1]
+
+    if r == 0:
+        combined_array = np.zeros(2 * cir_size, dtype=np.uint8)
+        combined_array[1:cir_size+1] = binary_array
+        combined_array[cir_size+1:] = reversed_binary_array[1:]
+    else:
+        combined_array = np.zeros(2 * cir_size + 1, dtype=np.uint8)
+        combined_array[1:cir_size+1] = binary_array
+        combined_array[cir_size+1:] = reversed_binary_array
+
+    return combined_array
 
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
 def calculate_A(args):
-    matrix_size, matrix_index, first_target_size, second_target_size, found = args
+    matrix_size, matrix_index, first_target_size, second_target_size = args
     
     A = np.zeros((matrix_size, matrix_size), dtype=np.uint8)
     
     counter = 0
-    vector = integer_to_binary(matrix_size // 4, matrix_index)
+    vector = diagonal_integer_to_binary(matrix_size, matrix_index)
     C1 = circulant_numba(vector)
-    C1 = triu_numba(C1) + triu_numba(C1).T
 
     assign_matrix_to_A(A, C1, 0, matrix_size//4, 0, matrix_size//4)
     
-    for matrix2_index in range(2 ** (matrix_size // 4 - 1)):
-        vector2 = integer_to_binary(matrix_size // 4, matrix2_index)
+    for matrix2_index in range(2 ** (matrix_size // 8)):
+        vector2 = diagonal_integer_to_binary(matrix_size, matrix2_index)
         C2 = circulant_numba(vector2)
-        C2 = triu_numba(C2) + triu_numba(C2).T
 
         assign_matrix_to_A(A, C2, 0, matrix_size//4, matrix_size//4, 2*matrix_size//4)
         assign_matrix_to_A(A, C2.T, matrix_size//4, 2*matrix_size//4, 0, matrix_size//4)
 
-        for matrix3_index in range(2 ** (matrix_size // 4 - 1)):
-            vector3 = integer_to_binary(matrix_size // 4, matrix3_index)
+        for matrix3_index in range(2 ** (matrix_size // 8)):
+            vector3 = diagonal_integer_to_binary(matrix_size, matrix3_index)
             C3 = circulant_numba(vector3)
-            C3 = triu_numba(C3) + triu_numba(C3).T
 
             assign_matrix_to_A(A, C3, 0, matrix_size//4, 2*matrix_size//4, 3*matrix_size//4)
             assign_matrix_to_A(A, C3.T, 2*matrix_size//4, 3*matrix_size//4, 0, matrix_size//4)
             
-            for matrix4_index in range(2 ** (matrix_size // 4 - 1)):
-                vector4 = integer_to_binary(matrix_size // 4, matrix4_index)
+            for matrix4_index in range(2 ** (matrix_size // 8)):
+                vector4 = diagonal_integer_to_binary(matrix_size, matrix4_index)
                 C4 = circulant_numba(vector4)
-                C4 = triu_numba(C4) + triu_numba(C4).T
 
                 assign_matrix_to_A(A, C4, 0, matrix_size//4, 3*matrix_size//4, matrix_size)
                 assign_matrix_to_A(A, C4.T, 3*matrix_size//4, matrix_size, 0, matrix_size//4)
 
-                for matrix5_index in range(2 ** (matrix_size // 4 - 1)):
-                    vector5 = integer_to_binary(matrix_size // 4, matrix5_index)
+                for matrix5_index in range(2 ** (matrix_size // 8)):
+                    vector5 = diagonal_integer_to_binary(matrix_size, matrix5_index)
                     C5 = circulant_numba(vector5)
-                    C5 = triu_numba(C5) + triu_numba(C5).T
 
                     assign_matrix_to_A(A, C5, matrix_size//4, 2*matrix_size//4, matrix_size//4, 2*matrix_size//4)
                     
-                    for matrix6_index in range(2 ** (matrix_size // 4 - 1)):
-                        vector6 = integer_to_binary(matrix_size // 4, matrix6_index)
+                    for matrix6_index in range(2 ** (matrix_size // 8)):
+                        vector6 = diagonal_integer_to_binary(matrix_size, matrix6_index)
                         C6 = circulant_numba(vector6)
-                        C6 = triu_numba(C6) + triu_numba(C6).T
 
                         assign_matrix_to_A(A, C6, matrix_size//4, 2*matrix_size//4, 2*matrix_size//4, 3*matrix_size//4)
                         assign_matrix_to_A(A, C6.T, 2*matrix_size//4, 3*matrix_size//4, matrix_size//4, 2*matrix_size//4)
                         
-                        for matrix7_index in range(2 ** (matrix_size // 4 - 1)):
-                            vector7 = integer_to_binary(matrix_size // 4, matrix7_index)
+                        for matrix7_index in range(2 ** (matrix_size // 8)):
+                            vector7 = diagonal_integer_to_binary(matrix_size, matrix7_index)
                             C7 = circulant_numba(vector7)
-                            C7 = triu_numba(C7) + triu_numba(C7).T
 
                             assign_matrix_to_A(A, C7, matrix_size//4, 2*matrix_size//4, 3*matrix_size//4, matrix_size)
                             assign_matrix_to_A(A, C7.T, 3*matrix_size//4, matrix_size, matrix_size//4, 2*matrix_size//4)
 
-                            for matrix8_index in range(2 ** (matrix_size // 4 - 1)):
-                                vector8 = integer_to_binary(matrix_size // 4, matrix8_index)
+                            for matrix8_index in range(2 ** (matrix_size // 8)):
+                                vector8 = diagonal_integer_to_binary(matrix_size, matrix8_index)
                                 C8 = circulant_numba(vector8)
-                                C8 = triu_numba(C8) + triu_numba(C8).T
 
                                 assign_matrix_to_A(A, C8, 2*matrix_size//4, 3*matrix_size//4, 2*matrix_size//4, 3*matrix_size//4)
 
-                                for matrix9_index in range(2 ** (matrix_size // 4 - 1)):
-                                    vector9 = integer_to_binary(matrix_size // 4, matrix9_index)
+                                for matrix9_index in range(2 ** (matrix_size // 8)):
+                                    vector9 = diagonal_integer_to_binary(matrix_size, matrix9_index)
                                     C9 = circulant_numba(vector9)
-                                    C9 = triu_numba(C9) + triu_numba(C9).T
 
                                     assign_matrix_to_A(A, C9, 2*matrix_size//4, 3*matrix_size//4, 3*matrix_size//4, matrix_size)
                                     assign_matrix_to_A(A, C9.T, 3*matrix_size//4, matrix_size, 2*matrix_size//4, 3*matrix_size//4)
 
-                                    for matrix10_index in range(2 ** (matrix_size // 4 - 1)):
-                                        vector10 = integer_to_binary(matrix_size // 4, matrix10_index)
+                                    for matrix10_index in range(2 ** (matrix_size // 8)):
+                                        vector10 = diagonal_integer_to_binary(matrix_size, matrix10_index)
                                         C10 = circulant_numba(vector10)
-                                        C10 = triu_numba(C10) + triu_numba(C10).T
 
                                         assign_matrix_to_A(A, C10, 3*matrix_size//4, matrix_size, 3*matrix_size//4, matrix_size)
                                         counter += 1
@@ -157,7 +170,7 @@ def calculate_A(args):
                                         if ret == 0:
                                             ret2 = set_indices(A, second_target_size, 0)
                                             if ret2 == 0:
-                                                decimal_value = sum(int(''.join(map(str, vec)), 2) * (2 ** (matrix_size // 4 - 1)) ** exp for vec, exp in zip([vector, vector2, vector3, vector4, vector5, vector6, vector7, vector8, vector9, vector10], [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]))
+                                                decimal_value = 2**9*matrix_index + 2**8*matrix2_index + 2**7*matrix3_index + 2**6*matrix4_index + 2**5*matrix5_index + 2**4*matrix6_index + 2**3*matrix7_index + 2**2*matrix8_index + 2**1*matrix9_index + 2*matrix10_index
                                                 return A, vector, vector2, vector3, vector4, vector5, vector6, vector7, vector8, vector9, vector10, decimal_value
 
     return None
@@ -170,10 +183,11 @@ def main():
     second_target_size = int(input("second_target_book: "))
     matrix_size = int(input("matrix_size: "))
 
-    print('Max', (2 ** (matrix_size // 4 - 1))**10)
+    print('Max', (2 ** (4 * (matrix_size // 8) + 4 * (matrix_size // 8 + 1))))
 
-    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size, found) for matrix_index in range(2 ** (matrix_size // 4 - 1))]
+    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size) for matrix_index in range(2 ** (matrix_size // 8))]
 
+    start = time.time()
     with Pool() as pool:
         for result in tqdm(pool.imap_unordered(calculate_A, args_list), total=len(args_list), desc="Finding satisfying graph", position=0, leave=True):
             if result is not None:
@@ -193,10 +207,13 @@ def main():
                 print(vector10)
                 found.value = True
                 break
+    end = time.time()
 
     if not found.value:
         print('not found')
 
+    print('time', end - start)
+    
 if __name__ == "__main__":
     print(datetime.datetime.now().time())
     main()
