@@ -96,6 +96,11 @@ def calculate_A(args):
     return None
 
 
+def generate_args_list(matrix_size, first_target_size, second_target_size):
+    for matrix_index in range(2 ** (matrix_size // 2)):
+        yield (matrix_size, matrix_index, first_target_size, second_target_size)
+
+
 def main():
     manager = Manager()
     found = manager.Value('b', False)  # 'b' stands for boolean
@@ -106,12 +111,11 @@ def main():
 
     print('Max', (2 ** (matrix_size // 2)))
 
-    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size)
-                 for matrix_index in range(2 ** (matrix_size // 2))]
+    args_generator = generate_args_list(matrix_size, first_target_size, second_target_size)
 
     start = time.time()
     with Pool() as pool:
-        for result in tqdm(pool.imap_unordered(calculate_A, args_list), total=len(args_list), desc="Finding satisfying graph", position=0, leave=True):
+        for result in tqdm(pool.imap_unordered(calculate_A, args_generator, chunksize=cpu_count()*2), total= 2 ** (matrix_size // 2),  desc="Finding satisfying graph", position=0, leave=True):
             if result is not None:
                 A, vector, decimal_value = result
                 print('found!')
