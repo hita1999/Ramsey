@@ -6,7 +6,7 @@ import numpy as np
 from scipy.linalg import circulant
 from numba import jit
 
-@jit(nopython=True)
+@jit(nopython=True, cache=True)
 def set_indices(target_matrix, target_size, condition):
     n = len(target_matrix)
     ret = -1
@@ -35,22 +35,60 @@ def set_indices(target_matrix, target_size, condition):
 
     return ret
 
-@jit(nopython=True)
+@jit(nopython=True, cache=True)
 def integer_to_binary(cir_size, i):
     binary_array = np.zeros(cir_size, dtype=np.uint8)
     for j in range(cir_size-1, -1, -1):
         binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
     return binary_array
 
+@jit(nopython=True, cache=True)
+def assign_matrix_to_A(A, matrix, row_start, row_end, col_start, col_end):
+    A[row_start:row_end, col_start:col_end] = matrix
+
+@jit(nopython=True, cache=True)
+def diagonal_integer_to_binary(matrix_size, i):
+    cir_size = matrix_size // 4
+    r = matrix_size % 4
+
+    binary_array = np.zeros(cir_size, dtype=np.uint8)
+    for j in range(cir_size-1, -1, -1):
+        binary_array[cir_size - 1 - j] = np.right_shift(i, j) & 1
+
+    reversed_binary_array = binary_array[::-1]
+
+    if r == 0:
+        combined_array = np.zeros(2 * cir_size, dtype=np.uint8)
+        combined_array[1:cir_size+1] = binary_array
+        combined_array[cir_size+1:] = reversed_binary_array[1:]
+    else:
+        combined_array = np.zeros(2 * cir_size + 1, dtype=np.uint8)
+        combined_array[1:cir_size+1] = binary_array
+        combined_array[cir_size+1:] = reversed_binary_array
+
+    return combined_array
+
+@jit(nopython=True, cache=True)
+def circulant_numba(c):
+    c = np.asarray(c).ravel()
+    L = len(c)
+    result = np.zeros((L, L), dtype=c.dtype)
+
+    for i in range(L):
+        for j in range(L):
+            result[i, j] = c[(i - j) % L]
+
+    return result
+
 def save_matrix_to_txt(matrix, file_path):
     np.savetxt(file_path, matrix, fmt='%d', delimiter='')
 
 
 def calculate_A_and_profile(args):
-    matrix_size, matrix_index, first_target_size, second_target_size, found = args
-    if matrix_index == 4:
+    matrix_size, matrix_index, first_target_size, second_target_size = args
+    if matrix_index == 3:
         # プロファイリング用のファイル名
-        profile_filename = f"res_profile/profile_results_B1B2_0.txt"
+        profile_filename = f"res_profile/profile_results_B11B12_3900X.txt"
 
         # プロファイリングを開始
         profile = cProfile.Profile()
@@ -68,35 +106,48 @@ def calculate_A_and_profile(args):
             stats.sort_stats("cumulative")
             stats.print_stats()
     else:
-        calculate_A(args)
-    return matrix_index
+        result = calculate_A(args)
+        if result is not None:
+            return result
+    return None
 
 def calculate_A(args):
-    matrix_size, matrix_index, first_target_size, second_target_size, found = args
+    matrix_size, matrix_index, first_target_size, second_target_size = args
+
+    A = np.zeros((matrix_size, matrix_size), dtype=np.uint8)
+
     counter = 0
-    vector = integer_to_binary(matrix_size // 2, matrix_index)
-    C1 = circulant(vector)
-    C1 = np.triu(C1) + np.triu(C1, 1).T
-    for matrix2_index in range(2 ** (matrix_size // 2 - 1)):
-        vector2 = integer_to_binary(matrix_size // 2, matrix2_index)
-        C2 = circulant(vector2)
-        C2 = np.triu(C2) + np.triu(C2, 1).T
-        for matrix3_index in range(2 ** (matrix_size // 2 - 1)):
-            vector3 = integer_to_binary(matrix_size // 2, matrix3_index)
-            C3 = circulant(vector3)
-            C3 = np.triu(C3) + np.triu(C3, 1).T
-            B1 = np.hstack((C1, C2))
-            B2 = np.hstack((C2.T, C3))
-            A = np.vstack((B1, B2))
+    vector = diagonal_integer_to_binary(matrix_size, matrix_index)
+    C1 = circulant_numba(vector)
+
+    assign_matrix_to_A(A, C1, 0, matrix_size//2, 0, matrix_size//2)
+
+    for matrix2_index in range(2 ** (matrix_size // 4)):
+        vector2 = diagonal_integer_to_binary(matrix_size, matrix2_index)
+
+        C2 = circulant_numba(vector2)
+
+        assign_matrix_to_A(A, C2, 0, matrix_size//2,
+                           matrix_size//2, matrix_size)
+        assign_matrix_to_A(A, C2.T, matrix_size//2,
+                           matrix_size, 0, matrix_size//2)
+
+        for matrix3_index in range(2 ** (matrix_size // 4)):
+            vector3 = diagonal_integer_to_binary(
+                matrix_size, matrix3_index)
+            C3 = circulant_numba(vector3)
+
+            assign_matrix_to_A(A, C3, matrix_size//2,
+                               matrix_size, matrix_size//2, matrix_size)
+
             counter += 1
 
             ret = set_indices(A, first_target_size, 2)
             if ret == 0:
                 ret2 = set_indices(A, second_target_size, 0)
                 if ret2 == 0:
-                    decimal_value = int(''.join(map(str, np.concatenate([vector, vector2, vector3], 0))), 2)
                     print('found!')
-                    print(decimal_value)
+                    decimal_value = matrix_index * matrix2_index * matrix3_index
                     return A, vector, vector2, vector3, decimal_value
 
     return None
@@ -109,13 +160,24 @@ def main():
     second_target_size = int(input("second_target_book: "))
     matrix_size = int(input("matrix_size: "))
 
-    print('Max', (2 ** (matrix_size // 2 - 1))**3)
+    print('Max', (2 ** (2 * (matrix_size // 4) + (matrix_size // 4 + 1))))
 
-    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size, found) for matrix_index in range(2 ** (matrix_size // 2 - 1))]
+    args_list = [(matrix_size, matrix_index, first_target_size, second_target_size)
+                 for matrix_index in range(2 ** (matrix_size // 4))]
 
     with Pool() as pool:
         # 各プロセスでプロファイリングを実行し、結果を取得
         results = list(pool.imap_unordered(calculate_A_and_profile, args_list))
+        for result in results:
+            if result is not None:
+                A, vector, vector2, vector3, decimal_value = result
+                print('A:', A)
+                print('vector:', vector)
+                print('vector2:', vector2)
+                print('vector3:', vector3)
+                print('decimal_value:', decimal_value)
+                found.value = True
+                break
 
     if not found.value:
         print('not found')
