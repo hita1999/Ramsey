@@ -1,2 +1,30 @@
+# Python
 __pycache__/
-res_profile
+*.py[cod]
+*.pyo
+*.nbi
+*.nbc
+
+# Virtual environments and packaging
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# Test, lint, and profiling outputs
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+res_profile/
+*.prof
+
+# Local scratch space
+tmp/
+generatedMatrix/_runs/
+searchResultTextFile/_runs/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
