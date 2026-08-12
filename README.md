@@ -76,6 +76,43 @@ book-ramsey verify decidedRamseyNumber
 PYTHONPATH=src python -m book_ramsey verify decidedRamseyNumber
 ```
 
+## 再利用可能な探索エンジン
+
+`book-ramsey search` は候補番号の半開区間 `[start, stop)` を探索します。小さい問題の自己診断には、完全グラフの上三角を整数のビット列として列挙する組み込みの `edge-bits` 構成を利用できます。次の例は3頂点上で $B_1$ を両色とも避ける彩色を探します。
+
+```bash
+book-ramsey search \
+  --first-book 1 --second-book 1 --order 3 \
+  --start 0 --stop 8 --workers 2 --chunk-size 1 \
+  --checkpoint runs/b1-b1.json \
+  --result-json runs/b1-b1-result.json \
+  --witness-output runs/b1-b1-matrix.txt
+```
+
+中断後は同じ条件に `--resume` を追加します。完了済みの連続区間の直後から再開するため、`--stop` を大きくして探索範囲を延長することもできます。
+
+```bash
+book-ramsey search \
+  --first-book 1 --second-book 1 --order 3 \
+  --start 0 --stop 8 \
+  --checkpoint runs/b1-b1.json --resume
+```
+
+独自の構成は、候補番号を1個受け取り0/1隣接行列を返す呼び出し可能オブジェクトとして公開し、`--factory package.module:factory` で指定します。複数workerで使うfactoryはpickle可能かつ決定的である必要があります。ライブラリからは `MatrixCandidateEvaluator` と `run_search` を直接利用できます。
+
+異なる大きさの2ブロック循環構成は組み込みfactoryで探索できます。たとえば22頂点を
+10+12に分け、最初の100万候補を調べるコマンドは次のとおりです。
+
+```bash
+book-ramsey search \
+  --first-book 4 --second-book 7 --order 22 \
+  --start 0 --stop 1000000 --workers 4 \
+  --factory two-block:10:12 \
+  --checkpoint runs/b4-b7-10x12.json
+```
+
+各候補について、色ごとの最大book、禁止サイズ以上のbookを持つ背表紙数、許容上限を超えたページ数の合計・最大値を記録します。候補の比較は「違反背表紙数、超過ページ量、最大超過量」の順で行うため、解がない探索でも最良のnear-missを次の局所探索に渡せます。結果JSONには探索範囲、検査候補数、経過時間、worker数、Python・OS情報、Git SHAと未コミット変更の有無も保存されます。
+
 ## ディレクトリ構成
 
 | パス | 内容 |
