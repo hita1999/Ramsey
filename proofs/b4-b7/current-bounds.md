@@ -95,7 +95,7 @@ R(B_4,B_6)=22.
 逆に、22頂点の彩色に赤い \(B_4\) も青い \(B_6\) もないと仮定する。赤次数を
 
 \[
-d_v=10+t_v,qquad
+d_v=10+t_v,\qquad
 \Delta=\sum_vt_v,qquad
 Q=\sum_vt_v^2
 \]
