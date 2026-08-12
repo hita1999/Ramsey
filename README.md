@@ -44,10 +44,17 @@ Bookグラフの2色Ramsey数に対する下界構成を、循環行列とブロ
 
 ## セットアップ
 
-Python 3.9以降を想定しています。macOSではシステムに `python` コマンドがない場合があるため、最初の仮想環境作成には `python3` を使います。
+Python 3.13以降を想定しています。最初に利用するPythonのバージョンを確認してください。
 
 ```bash
-python3 -m venv .venv
+python3.13 --version
+```
+
+macOSではシステムの `python3` が古い場合があるため、仮想環境の作成時に
+`python3.13` を明示します。
+
+```bash
+python3.13 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e '.[search,dev]'
@@ -56,7 +63,7 @@ python -m pip install -e '.[search,dev]'
 検証CLIだけを使う場合は外部依存関係を必要としません。上と同様に仮想環境を作成・有効化してからインストールします。
 
 ```bash
-python3 -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e .
