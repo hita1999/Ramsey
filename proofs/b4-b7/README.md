@@ -8,9 +8,12 @@
 |---|---|---|
 | \(R(B_4,B_7)\ge 22\) | 証明済み | [`current-bounds.md`](current-bounds.md) |
 | \(R(B_4,B_7)\le 23\) | 証明済み | [`current-bounds.md`](current-bounds.md) |
+| \(R(B_4,B_6)=22\) と飽和青辺の存在 | 証明済み | [`current-bounds.md`](current-bounds.md) |
 | \(3\sum_v(d_v-10)^2+2S=132\) | 証明済み | [`research-notes.md`](research-notes.md) |
 | 22頂点反例では \(6\le d_v\le12\) | 証明済み | [`research-notes.md`](research-notes.md) |
 | 次数5・13の反例候補 | 反証済み | [`research-notes.md`](research-notes.md) |
+| 次数6・12の局所次数型 | 証明済み | [`research-notes.md`](research-notes.md) |
+| 22頂点反例では飽和赤辺44本以上・飽和青辺55本以上 | 証明済み | [`research-notes.md`](research-notes.md) |
 | 22頂点反例は存在しない | 予想 | 未決定 |
 | 22頂点反例は存在する | 予想 | 上と排他的な未決定候補 |
 
