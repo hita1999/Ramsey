@@ -1,0 +1,53 @@
+{
+  "best": {
+    "index": 393156,
+    "score": {
+      "color_one": {
+        "excess_pages": 111,
+        "maximum_excess": 7,
+        "maximum_pages": 10,
+        "maximum_spine": [
+          0,
+          5
+        ],
+        "target": 4,
+        "violating_spines": 17
+      },
+      "color_zero": {
+        "excess_pages": 0,
+        "maximum_excess": 0,
+        "maximum_pages": 6,
+        "maximum_spine": [
+          0,
+          1
+        ],
+        "target": 7,
+        "violating_spines": 0
+      }
+    }
+  },
+  "format_version": 1,
+  "metadata": {
+    "candidates_examined": 8388608,
+    "chunk_size": 256,
+    "effective_start": 200000,
+    "elapsed_seconds": 511.7526563750289,
+    "finished_at": "2026-08-12T15:19:09.518978+00:00",
+    "first_book": 4,
+    "git_dirty": false,
+    "git_sha": "739e86ac0aa938a4ec6368ea210e68922195e785",
+    "hostname": "HT-2.local",
+    "label": "b4-b7-10x12-local-20260813",
+    "next_index": 8388608,
+    "order": 22,
+    "platform": "macOS-13.7.4-arm64-arm-64bit-Mach-O",
+    "python_version": "3.13.15",
+    "requested_start": 0,
+    "requested_stop": 8388608,
+    "second_book": 7,
+    "started_at": "2026-08-12T15:10:55.764062+00:00",
+    "workers": 4
+  },
+  "status": "complete",
+  "witness": null
+}
