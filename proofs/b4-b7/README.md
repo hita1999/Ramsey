@@ -15,7 +15,7 @@
 | 赤・青局所間の集合族補題 | 証明済み | [`research-notes.md`](research-notes.md) |
 | 次数7頂点の青側完全分類 | 証明済み | [`research-notes.md`](research-notes.md) |
 | 次数11頂点の赤局所不足量は1または3 | 証明済み | [`research-notes.md`](research-notes.md) |
-| 次数7の閉形式局所型の延長 | 反証済み | [`research-notes.md`](research-notes.md) |
+| 次数7の均一局所型 \(r=0,q_u=3\) | 反証済み | [`research-notes.md`](research-notes.md) |
 | 22頂点反例では飽和赤辺44本以上・飽和青辺55本以上 | 証明済み | [`research-notes.md`](research-notes.md) |
 | 22頂点反例は存在しない | 予想 | 未決定 |
 | 22頂点反例は存在する | 予想 | 上と排他的な未決定候補 |
