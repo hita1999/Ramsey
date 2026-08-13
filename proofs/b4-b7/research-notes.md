@@ -1486,6 +1486,46 @@ X^2-117X+2912\le0.
 
 これは有限グラフの列挙ではなく、二つの線形方程式と偏差平方和の整数解である。従って各型について \(13\times8\) 交差接続行列のGram条件を調べれば、次数8最小等号型を尽くせる。【証明済み】
 
+そのGram条件を明示する。\(R\) を \(M\times A\) の交差**赤**接続行列、\(K\) を6正則青局所グラフ \(J\) の隣接行列、\(\boldsymbol q=R\mathbf1\) を行次数ベクトルとする。\(M\) 内の全頂点対で (17), (18) が等号なので、異なる \(u,w\in M\) について
+
+\[
+(RR^{\mathsf T})_{uw}=
+\begin{cases}
+q_u+q_w-3-(K^2)_{uw},&K_{uw}=1,\\
+4-(K^2)_{uw},&K_{uw}=0.
+\end{cases}
+\]
+
+対角成分は \(q_u\) だから、行列では
+
+\[
+\boxed{
+RR^{\mathsf T}
+=4(\mathbf J-I)-K^2
++K\circ(\boldsymbol q\mathbf1^{\mathsf T}
++\mathbf1\boldsymbol q^{\mathsf T}-7\mathbf J)
++\operatorname{diag}(\boldsymbol q+6\mathbf1)
+}.
+\tag{30h''''}
+\]
+
+右辺は半正定値で階数8以下でなければならない。
+
+列次数が \(4,4,5^6\) であることも行和へ正確に残せる。\(\ell_u\) を、頂点 \(u\) が属する次数4の列の本数とすれば、\(0\le\ell_u\le2\)、\(\sum_u\ell_u=8\) であり、\(RR^{\mathsf T}\mathbf1=R(4,4,5,\ldots,5)^{\mathsf T}=5\boldsymbol q-\boldsymbol\ell\) である。一方 (30h'''') の行和を取ると
+
+\[
+RR^{\mathsf T}\mathbf1=7\boldsymbol q+K\boldsymbol q-24\mathbf1.
+\]
+
+従って \(\boldsymbol p=\boldsymbol q-3\mathbf1\) と置けば
+
+\[
+\boxed{(K+2I)\boldsymbol p=-\boldsymbol\ell.}
+\tag{30h'''''}
+\]
+
+ここで \(p_u\in\{-2,-1,0,1,2\}\)、\(\sum_up_u=-1\) である。この一次式、Gram行列の半正定値性、階数条件を同時に用いることが、16次数型の次の完全な判定問題である。【証明済み】
+
 この7本上の条件は、二つの小さい誘導辺数に置き換えられる。\(p=p_u\)、\(C_u=A\setminus Y_u\)、\(q=|C_u|=3+p\)、\(y=|Y_u|=4-p\) とし、
 
 \[
