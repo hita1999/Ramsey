@@ -15,6 +15,7 @@
 | 赤・青局所間の集合族補題 | 証明済み | [`research-notes.md`](research-notes.md) |
 | 次数7頂点の青側完全分類 | 証明済み | [`research-notes.md`](research-notes.md) |
 | 次数7頂点は高々2個 | 証明済み | [`research-notes.md`](research-notes.md) |
+| 次数7頂点が二つある分岐 | 反証済み | [`n7-two-projection.md`](n7-two-projection.md) |
 | 次数11頂点の赤局所不足量は1または3 | 証明済み | [`research-notes.md`](research-notes.md) |
 | 次数7の均一局所型 \(r=0,q_u=3\) | 反証済み | [`research-notes.md`](research-notes.md) |
 | 22頂点反例では飽和赤辺44本以上・飽和青辺55本以上 | 証明済み | [`research-notes.md`](research-notes.md) |
@@ -33,6 +34,7 @@
 
 - [`current-bounds.md`](current-bounds.md): 既知範囲 \(22\le R(B_4,B_7)\le23\) の整形済み非計算証明。
 - [`research-notes.md`](research-notes.md): 22頂点反例を仮定した恒等式、局所補題、次の研究課題。
+- [`n7-two-projection.md`](n7-two-projection.md): 次数7頂点が二つある分岐を射影不等式と有理線形証明書で排除する自足的証明。
 - [`sources.md`](sources.md): 出典、各文献への依存関係、確認状況。
 - [`verification.md`](verification.md): 独立再導出、機械検算、Git差分監査の記録。
 
