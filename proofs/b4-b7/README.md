@@ -20,6 +20,7 @@
 | 次数7の均一局所型 \(r=0,q_u=3\) | 反証済み | [`research-notes.md`](research-notes.md) |
 | 次数7・\(\alpha=1\) の分岐 | 6次Gram行列と根付き三正則小型から反証済み | [`n7-alpha1-gram.md`](n7-alpha1-gram.md) |
 | 次数7・\(\alpha=3\) の分岐 | 三角形排除、6次集合Gram、\(N\times O\) 二重計数から反証済み | [`n7-alpha3-gram.md`](n7-alpha3-gram.md) |
+| 次数7・\(\alpha=5\) の分岐 | 五つの次数11局所型、6次集合Gram、重み付き次数和から反証済み | [`n7-alpha5-gram.md`](n7-alpha5-gram.md) |
 | 22頂点反例では飽和赤辺44本以上・飽和青辺55本以上 | 証明済み | [`research-notes.md`](research-notes.md) |
 | 22頂点反例は存在しない | 予想 | 未決定 |
 | 22頂点反例は存在する | 予想 | 上と排他的な未決定候補 |
@@ -39,6 +40,7 @@
 - [`n7-two-projection.md`](n7-two-projection.md): 次数7頂点が二つある分岐を射影不等式と有理線形証明書で排除する自足的証明。
 - [`n7-alpha1-gram.md`](n7-alpha1-gram.md): 唯一の次数7中心で赤局所不足量 \(\alpha=1\) となる分岐を6次Gram行列で排除する自足的証明。
 - [`n7-alpha3-gram.md`](n7-alpha3-gram.md): 唯一の次数7中心で赤局所不足量 \(\alpha=3\) となる分岐を三つの次数11局所型と6次集合Gramから排除する自足的証明。
+- [`n7-alpha5-gram.md`](n7-alpha5-gram.md): 唯一の次数7中心で赤局所不足量 \(\alpha=5\) となる分岐を五つの次数11局所型と6次集合Gramから排除する自足的証明。
 - [`sources.md`](sources.md): 出典、各文献への依存関係、確認状況。
 - [`verification.md`](verification.md): 独立再導出、機械検算、Git差分監査の記録。
 
