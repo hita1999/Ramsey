@@ -18,6 +18,7 @@
 | 次数7頂点が二つある分岐 | 反証済み | [`n7-two-projection.md`](n7-two-projection.md) |
 | 次数11頂点の赤局所不足量は1または3 | 証明済み | [`research-notes.md`](research-notes.md) |
 | 次数7の均一局所型 \(r=0,q_u=3\) | 反証済み | [`research-notes.md`](research-notes.md) |
+| 次数7・\(\alpha=1\) の赤局所型 | 一つの \(C_4\) 型へ縮約し、全 \(q=4\) 行を二ブロックに固定 | [`research-notes.md`](research-notes.md) |
 | 22頂点反例では飽和赤辺44本以上・飽和青辺55本以上 | 証明済み | [`research-notes.md`](research-notes.md) |
 | 22頂点反例は存在しない | 予想 | 未決定 |
 | 22頂点反例は存在する | 予想 | 上と排他的な未決定候補 |
