@@ -45,7 +45,7 @@ A=A_0\dot\cup A_1,
 とする。\(F\)-次数3の頂点集合を \(U_A\subset A\)、\(U_B\subset B\) とし、
 
 \[
-a_i=|U_A\cap A_i|,qquad b_i=|U_B\cap B_i|.
+a_i=|U_A\cap A_i|,\qquad b_i=|U_B\cap B_i|.
 \]
 
 (P2) により、\(U_A\cap A_i\) の各頂点は \(F\) を通じて \(U_B\) にちょうど \(a_i\) 本の辺を出す。同じことを \(B\) 側から数えると
@@ -128,8 +128,8 @@ K=ZZ^{\mathsf T}
 \(L\) を \(E=B\cup D\) 上の赤誘導グラフとし、\(L_D\) をその隣接行列の \(D\) に対応する14×8列部分とする。(30eB), (30eP) から
 
 \[
-L\text{ は7正則},qquad
-L_D\mathbf1_8=4\mathbf1_{14},qquad
+L\text{ は7正則},\qquad
+L_D\mathbf1_8=4\mathbf1_{14},\qquad
 \mathbf1_{14}^{\mathsf T}L_D=7\mathbf1_8^{\mathsf T}.
 \]
 
@@ -285,7 +285,7 @@ w(T)=2E(T)-\sqrt{14E(T)}.
 各有理下界は平方根を近似していない。\(w(E)\ge c\) は
 
 \[
-2E-c\ge0,qquad (2E-c)^2-14E\ge0
+2E-c\ge0,\qquad (2E-c)^2-14E\ge0
 \]
 
 を有理数計算で確認すればよい。上表で後者の最小余裕も正である。また \(E>7/8\) では \(w(E)\) は増加するので、混合ブロックについては最小 \(E\) だけ確認すれば十分である。
@@ -349,15 +349,15 @@ p\le\left\lfloor2+\frac k2\right\rfloor.
 \(B_p\) に属する \(F\) の列を、その列の \(F\)-次数が3なら \(h=1\)、2なら \(h=0\) と分類する。各カテゴリーの列数は
 
 \[
-n_{0,1}=a,quad n_{0,0}=3-a,quad
-n_{1,1}=k-a,quad n_{1,0}=3-k+a.
+n_{0,1}=a,\quad n_{0,0}=3-a,\quad
+n_{1,1}=k-a,\quad n_{1,0}=3-k+a.
 \tag{P17}
 \]
 
 カテゴリー \((p,h)\) の列の台 \(S\subset A\) は
 
 \[
-|S|=2+h,qquad
+|S|=2+h,\qquad
 |S\cap U_A|=
 \begin{cases}
 a,&p=0,\\
@@ -382,7 +382,7 @@ k-a,&i\in A_1
 \(D\)-次数式、カテゴリー数、\(F\)-次数式、高次数 \(F\)-列の次数式、頂点対共通列式に、それぞれ係数
 
 \[
-\alpha_i,quad\beta_{p,h},quad\gamma_i,quad\delta_i,quad\rho_{ij}
+\alpha_i,\quad\beta_{p,h},\quad\gamma_i,\quad\delta_i,\quad\rho_{ij}
 \]
 
 を掛ける。もし全3元集合 \(T\subset A\) について

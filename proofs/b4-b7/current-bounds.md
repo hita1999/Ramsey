@@ -96,7 +96,7 @@ R(B_4,B_6)=22.
 
 \[
 d_v=10+t_v,\qquad
-\Delta=\sum_vt_v,qquad
+\Delta=\sum_vt_v,\qquad
 Q=\sum_vt_v^2
 \]
 
