@@ -1670,6 +1670,94 @@ X=48,quad
 
 が \((Q,S_A,S_M,S_{AM})=(8,14,12,28)\) を与え、(30hA)--(30hD) をすべて満たす。従って \(X>38\) の排除には、領域総量ではなく各交差辺における不足量の配置、または局所グラフとのGram条件が本質的に必要である。
 
+その配置条件も行列で完全に記述できる。\(H\) を3正則赤局所グラフ \(G[A]\) の隣接行列、\(K\) を6正則青局所グラフ \(\overline G[M]\) の隣接行列、\(R\) を \(M\times A\) の交差赤接続行列とする。行次数、列次数を
+
+\[
+\boldsymbol q=R\mathbf1,
+\qquad
+\boldsymbol x=R^{\mathsf T}\mathbf1
+\]
+
+と書く。\(D_A,D_M\) を、それぞれ \(A\) 内、\(M\) 内の各頂点対のBook不足量を非対角成分に持つ対称行列とし、対角を0とする。このとき
+
+\[
+\boxed{
+\begin{aligned}
+R^{\mathsf T}R+D_A
+={}&(\mathbf J-I-H)\circ
+(\boldsymbol x\mathbf1^{\mathsf T}
++\mathbf1\boldsymbol x^{\mathsf T}-7\mathbf J)\\
+&+2H-H^2+\operatorname{diag}(\boldsymbol x+3\mathbf1),
+\end{aligned}
+}
+\tag{30hE}
+\]
+
+\[
+\boxed{
+\begin{aligned}
+RR^{\mathsf T}+D_M
+={}&4(\mathbf J-I)-K^2\\
+&+K\circ(\boldsymbol q\mathbf1^{\mathsf T}
++\mathbf1\boldsymbol q^{\mathsf T}-7\mathbf J)
++\operatorname{diag}(\boldsymbol q+6\mathbf1).
+\end{aligned}
+}
+\tag{30hF}
+\]
+
+が成り立つ。例えば (30hF) の非対角成分は、\(K_{uw}=1\) なら
+
+\[
+q_u+q_w-3-(K^2)_{uw},
+\]
+
+\(K_{uw}=0\) なら
+
+\[
+4-(K^2)_{uw}
+\]
+
+であり、実際の行共通部分 \((RR^{\mathsf T})_{uw}\) との差がその辺の不足量である。(30hE) も、\(H_{ab}=1\) では \(2-(H^2)_{ab}\)、\(H_{ab}=0\) では \(x_a+x_b-7-(H^2)_{ab}\) から実際の列共通部分を引いたものになっている。従って両式は (15)--(18) の不等式だけでなく、各不等式の余りを保った等式である。
+
+交差領域も同様である。\(L=\mathbf J-I-K\) を \(M\) 内の赤隣接行列、\(\overline H=\mathbf J-I-H\) を \(A\) 内の青隣接行列、\(B=\mathbf J-R\) を交差青接続行列とし、\(D_{AM}\) を各交差辺の不足量行列とする。適切なサイズの全1行列をすべて \(\mathbf J\) と略記すれば
+
+\[
+\boxed{
+\begin{aligned}
+D_{AM}
+={}&R\circ\{3\mathbf J-LR-RH\}\\
+&+(\mathbf J-R)\circ
+\{6\mathbf J-KB-B\overline H\}.
+\end{aligned}
+}
+\tag{30hG}
+\]
+
+実際、赤交差辺 \(ua\) の赤共通近傍数は \((LR+RH)_{ua}\)、青交差辺の青共通近傍数は \((KB+B\overline H)_{ua}\) である。
+
+三つの不足量行列は成分ごとに非負整数であり、
+
+\[
+\frac12\mathbf1^{\mathsf T}D_A\mathbf1=S_A,
+\qquad
+\frac12\mathbf1^{\mathsf T}D_M\mathbf1=S_M,
+\qquad
+\mathbf1^{\mathsf T}D_{AM}\mathbf1=S_{AM}.
+\tag{30hH}
+\]
+
+また各頂点の不足量は
+
+\[
+\boldsymbol s_A=D_A\mathbf1+D_{AM}^{\mathsf T}\mathbf1,
+\qquad
+\boldsymbol s_M=D_M\mathbf1+D_{AM}\mathbf1.
+\tag{30hI}
+\]
+
+【証明済み】従って \(X>38\) の残存問題は、(30hE), (30hF) の右辺から非負整数不足量行列を引いた二行列が、同じ0--1行列 \(R\) の二つのGram行列となり、さらに (30hG)--(30hI) を満たせるかという階数8以下の整数行列問題である。\(X=38,S_M=0\) では \(D_M=0\) となり、既に使った (30h'''') が (30hF) からそのまま復元される。
+
 \(X=38\) では \(A\) 側の大域次数は \(8,8,9^6\) であり、中心頂点の偏差4と合わせて \(Q\) を18だけ消費する。\(u\in M\) の \(A\) への赤次数を \(q_u\) とすると、\(J\) が6正則なので \(d_u=6+q_u\) であり、
 
 \[
