@@ -23,6 +23,9 @@
 | 次数7・\(\alpha=5\) の分岐 | 五つの次数11局所型、6次集合Gram、重み付き次数和から反証済み | [`n7-alpha5-gram.md`](n7-alpha5-gram.md) |
 | 次数7・\(\alpha=7,9,11\) の分岐 | 正規化不足量と共通の五標準型から一括反証済み | [`n7-alpha7-11-gram.md`](n7-alpha7-11-gram.md) |
 | 22頂点反例の最小次数 | \(\delta(G)\ge8\) | [`n7-alpha7-11-gram.md`](n7-alpha7-11-gram.md) |
+| 次数8頂点の完全排除 | 未決定。\(s_v=0,2\) だけでは網羅せず、\(s_v\ge4\) も処理する必要がある | [`research-notes.md`](research-notes.md) |
+| Bridge-8 | 大域総量・一頂点局所条件だけからは導けない。命題自体の真偽は未決定 | [`research-notes.md`](research-notes.md) |
+| 次数列 \(8^1 10^{21}\)、\((\alpha_v,\beta_v)=(0,4)\) | \(\varepsilon=1^4\)、\(K[P]\in\{C_4,K_4-e,K_4\}\) まで縮約済み。分岐は未決定 | [`research-notes.md`](research-notes.md) |
 | 22頂点反例では飽和赤辺44本以上・飽和青辺55本以上 | 証明済み | [`research-notes.md`](research-notes.md) |
 | 22頂点反例は存在しない | 予想 | 未決定 |
 | 22頂点反例は存在する | 予想 | 上と排他的な未決定候補 |
